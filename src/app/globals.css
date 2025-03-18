@@ -147,3 +147,116 @@
     @apply bg-background text-foreground;
   }
 }
+
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  font-family: "Inter", sans-serif !important;
+}
+
+.react-calendar__navigation__label__labelText {
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.rbc-btn-group:first-child {
+  display: none !important;
+}
+
+.rbc-toolbar-label {
+  text-align: right !important;
+  padding: 0px 20px !important;
+}
+
+.rbc-btn-group:last-child {
+  font-size: 13px !important;
+}
+
+.rbc-btn-group:last-child button {
+  border: none !important;
+  background-color: var(--background) !important;
+  margin-left: 2px !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: var(--primary) !important;
+  box-shadow: none !important;
+  color: var(--primary-foreground) !important;
+}
+
+.rbc-time-view {
+  border-color: var(--sidebar-border) !important;
+}
+
+.rbc-time-header {
+  display: none !important;
+}
+
+.rbc-time-content {
+  border: none !important;
+}
+
+.rbc-time-gutter.rbc-time-column {
+  font-size: 12px !important;
+}
+
+.rbc-time-gutter.rbc-time-column .rbc-timeslot-group {
+  padding: 0px 20px !important;
+}
+
+.rbc-timeslot-group {
+  background-color: var(--background) !important;
+}
+
+.rbc-day-slot {
+  font-size: 14px !important;
+}
+
+.rbc-event {
+  border: var(--border) 1px solid !important;
+  color: var(--foreground) !important;
+  padding: 10px !important;
+  margin: 10px !important;
+  width: 99% !important;
+}
+
+.rbc-event:nth-child(1) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(2) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(3) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(4) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(5) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(6) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(7) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event:nth-child(8) {
+  background-color: var(--card) !important;
+}
+
+.rbc-event-label {
+  color: var(--muted-foreground) !important;
+  margin-bottom: 5px;
+}

@@ -1,87 +1,89 @@
+import { Book, BookA, BookCheck, BookOpenCheck, Calendar, CircleUserRound, FileUser, House, ListCheck, LogOut, Megaphone, MessageCircle, PersonStanding, Presentation, Settings, UserRoundPen, UsersRound } from "lucide-react";
+
 export const menuItems = [
     {
         title: "MENU",
         items: [
             {
-                icon: "/home.png",
+                icon: <House />,
                 label: "Home",
                 href: "/",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/teacher.png",
+                icon: <UserRoundPen />,
                 label: "Teachers",
                 href: "/list/teachers",
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/student.png",
+                icon: <PersonStanding />,
                 label: "Students",
                 href: "/list/students",
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/parent.png",
+                icon: <UsersRound />,
                 label: "Parents",
                 href: "/list/parents",
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/subject.png",
+                icon: <Book />,
                 label: "Subjects",
                 href: "/list/subjects",
                 visible: ["admin"],
             },
             {
-                icon: "/class.png",
+                icon: <Presentation />,
                 label: "Classes",
                 href: "/list/classes",
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/lesson.png",
+                icon: <BookCheck />,
                 label: "Lessons",
                 href: "/list/lessons",
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/exam.png",
+                icon: <BookOpenCheck />,
                 label: "Exams",
                 href: "/list/exams",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/assignment.png",
+                icon: <BookA />,
                 label: "Assignments",
                 href: "/list/assignments",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/result.png",
+                icon: <FileUser />,
                 label: "Results",
                 href: "/list/results",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/attendance.png",
+                icon: <ListCheck />,
                 label: "Attendance",
                 href: "/list/attendance",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/calendar.png",
+                icon: <Calendar />,
                 label: "Events",
                 href: "/list/events",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/message.png",
+                icon: <MessageCircle />,
                 label: "Messages",
                 href: "/list/messages",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/announcement.png",
+                icon: <Megaphone />,
                 label: "Announcements",
                 href: "/list/announcements",
                 visible: ["admin", "teacher", "student", "parent"],
@@ -92,19 +94,19 @@ export const menuItems = [
         title: "OTHER",
         items: [
             {
-                icon: "/profile.png",
+                icon: <CircleUserRound />,
                 label: "Profile",
                 href: "/profile",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/setting.png",
+                icon: <Settings />,
                 label: "Settings",
                 href: "/settings",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
-                icon: "/logout.png",
+                icon: <LogOut />,
                 label: "Logout",
                 href: "/logout",
                 visible: ["admin", "teacher", "student", "parent"],
