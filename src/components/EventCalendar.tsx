@@ -9,10 +9,10 @@ export function EventCalendar() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
 
   const events = [
-    { id: 1, title: "Event 1", time: "10:00 AM", description: "This is event 1", date: new Date(2025, 2, 7) },
-    { id: 2, title: "Event 2", time: "12:00 PM", description: "This is event 2", date: new Date(2025, 2, 7) },
-    { id: 3, title: "Event 3", time: "2:00 PM", description: "This is event 3", date: new Date(2025, 2, 8) },
-    { id: 4, title: "Event 4", time: "4:00 PM", description: "This is event 4", date: new Date(2025, 2, 9) },
+    { id: 1, title: "Event 1", time: "10:00 AM", description: "This is event 1", date: new Date(2025, 2, 19) },
+    { id: 2, title: "Event 2", time: "12:00 PM", description: "This is event 2", date: new Date(2025, 2, 20) },
+    { id: 3, title: "Event 3", time: "2:00 PM", description: "This is event 3", date: new Date(2025, 2, 18) },
+    { id: 4, title: "Event 4", time: "4:00 PM", description: "This is event 4", date: new Date(2025, 2, 17) },
   ]
 
   const filteredEvents = events.filter(event => {
@@ -51,7 +51,7 @@ export function EventCalendar() {
                 <h2 className="text-lg font-semibold">{event.title}</h2>
                 <p className="text-muted-foreground">{event.time}</p>
                 </div>
-                
+
                 <p>{event.description}</p>
 
               </Card>

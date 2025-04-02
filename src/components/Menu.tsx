@@ -79,7 +79,7 @@ export const menuItems = [
             {
                 icon: <MessageCircle />,
                 label: "Messages",
-                href: "/list/messages",
+                href: "/list/conversations",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
