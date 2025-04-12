@@ -33,3 +33,26 @@ export const get = query({
     }
 }
 )
+
+export const count = query({
+    args: { clerkId: v.string() },
+    handler: async (ctx, args) => {
+        const identity = await getUserByClerkId({ ctx, clerkId: args.clerkId });
+        if (!identity) {
+            throw new ConvexError("Not authenticated");
+        }
+
+        const currentUser = await getUserByClerkId({ ctx, clerkId: args.clerkId });
+
+        if (!currentUser) {
+            throw new ConvexError("User not found");
+        }
+
+        const requests = await ctx.db.query("requests")
+        .withIndex("by_receiver", (q) => q.eq("receiverId", currentUser._id))
+        .collect()
+
+    return requests.length
+    },
+
+})

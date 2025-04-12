@@ -1,4 +1,5 @@
 "use client"
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -15,19 +16,25 @@ const DesktopNav = () => {
                 {paths.map((path, id) => {
                     return (
                         <li key={id} className='relative'>
-                            <Link href={path.href}>
+                        <Link href={path.href}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button size="icon" variant={
-                                        path.active ? "default" : "outline"
-                                    }>{path.icon}</Button>
+                                    <Button size="icon" variant={path.active ? "default" : "outline"}>
+                                        {path.icon}
+                                    </Button>
                                 </TooltipTrigger>
+                                {path.count ? (
+                                    <Badge className="absolute bottom-7 left-6 px-2 rounded-full">
+                                        {path.count}
+                                    </Badge>
+                                ) : null}
                                 <TooltipContent>
                                     <p>{path.name}</p>
                                 </TooltipContent>
                             </Tooltip>
-                            </Link>
-                        </li>
+                        </Link>
+                    </li>
+                    
                     )
                 })}
             </ul></nav></Card>
