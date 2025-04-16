@@ -11,6 +11,7 @@ type Props = {
   lastByUser: boolean;
   content: string[];
   createdAt: string;
+  seen?: React.ReactNode;
   type: string;
 };
 
@@ -38,7 +39,7 @@ const Message = (props: Props) => {
           })}
         >
           {props.type === "text" ? (
-            <p className="text-wrapbreak-words whitespace-pre-wrap">
+            <p className="text-wrapbreak-words whitespace-pre-wrap break-all">
               {props.content}
             </p>
           ) : null}
@@ -51,6 +52,7 @@ const Message = (props: Props) => {
             {formatTime(props.createdAt)}
           </p>
         </div>
+        {/* {props.seen} */}
       </div>
       <Avatar
         className={cn("relative w-8 h-8", {

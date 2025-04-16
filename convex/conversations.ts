@@ -1,6 +1,8 @@
 import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
 import { getUserByClerkId } from "./getUser";
+import { QueryCtx, MutationCtx } from "./_generated/server"
+import { Id } from "./_generated/dataModel";
 
 export const get = query({
   args: { clerkId: v.string() },
@@ -38,12 +40,20 @@ export const get = query({
         const allConversationMemberships = await ctx.db
           .query("conversationMembers")
           .withIndex("by_conversationId", (q) =>
-            q.eq("conversationId", conversation._id)
+            q.eq("conversationId", conversation?._id)
           )
           .collect();
 
+          const lastMessage = await getLastMessageDetails({ctx, id: conversation.lastMessageId})
+
+          const lastSeenMessage = conversationMemberships[index].lastSeenMessage ? await ctx.db.get(conversationMemberships[index].lastSeenMessage!) : null
+
+          const lastSeenMessageTime = lastSeenMessage ? lastSeenMessage._creationTime : -1
+
+          const unseenMessages = await ctx.db.query("messages").withIndex("by_conversationId", (q) => q.eq("conversationId", conversation._id)).filter((q) => q.gt(q.field("_creationTime"), lastSeenMessageTime)).filter((q) => q.neq(q.field("senderId"), currentUser._id)).collect()
+
         if (conversation.isGroup) {
-          return { conversation };
+          return { conversation, lastMessage, unseenCount: unseenMessages.length };
         } else {
           const otherMembership = allConversationMemberships.filter(
             (membership) => membership.memberId !== currentUser._id
@@ -54,6 +64,8 @@ export const get = query({
           return {
             conversation,
             otherMember,
+            lastMessage,
+            unseenCount: unseenMessages.length
           };
         }
       })
@@ -62,3 +74,32 @@ export const get = query({
     return conversationsWithDetails;
   },
 });
+
+
+const getLastMessageDetails = async ({ctx, id}: {ctx: QueryCtx | MutationCtx, id: Id<"messages"> | undefined}) => {
+if (!id) return null;
+
+const message = await ctx.db.get(id)
+
+if (!message) return null
+
+const sender = await ctx.db.get(message.senderId)
+
+if (!sender) return null
+
+const content = getMessageContent(message.type, message.content as unknown as string)
+
+return {
+  content,
+  sender: sender.username
+}
+}
+
+const getMessageContent = (type: string, content: string) => {
+  switch(type) {
+    case "text":
+      return content;
+      default: 
+      return "[Non-text]"
+  }
+}

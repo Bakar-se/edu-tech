@@ -6,32 +6,28 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge, User } from "lucide-react";
 
 type Props = {
   id: string;
-  imageUrl?: string;
-  username: string;
-  email?: string;
+  name: string;
   lastMessageSender?: string;
   lastMessageContent?: string;
   unseenCount: number;
 };
 
-const DMConversationItem = (props: Props) => {
+const GroupConversationItem = (props: Props) => {
   return (
     <Link href={`/list/conversations/${props.id}`} className="w-full">
       <Card className="p-2 flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-4 truncate">
           <Avatar>
-            <AvatarImage src={props.imageUrl} />
             <AvatarFallback>
-              <User />
+              {props.name.charAt(0).toLocaleUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col truncate">
-            <h4 className="truncate">{props.username}</h4>
+            <h4 className="truncate">{props.name}</h4>
             {props.lastMessageSender && props.lastMessageContent ? (<span className="text-sm text-muted-foreground flex truncate overflow-ellipsis">
               <p className="font-semibold">
                 {props.lastMessageSender}
@@ -44,9 +40,10 @@ const DMConversationItem = (props: Props) => {
           </div>
         </div>
         {props.unseenCount ? <Badge>{props.unseenCount}</Badge> : null}
+
       </Card>
     </Link>
   );
 };
 
-export default DMConversationItem;
+export default GroupConversationItem;
