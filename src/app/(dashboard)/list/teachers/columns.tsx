@@ -8,9 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import axios from "axios";
 
 export type Teacher = {
-  id: number;
+  id: string;
   teacherId: string;
   name: string;
   email: string;
@@ -20,10 +21,20 @@ export type Teacher = {
   address: string;
 };
 
-// ✅ Wrap columns inside a function to pass role dynamically
 export const useTeacherColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
+
+  const deleteTeacher = async (teacherId: string) => {
+    try {
+      const res = await axios.delete(`/api/teachers/delete/${teacherId}`);
+      console.log("Deleted:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("Error deleting teacher:", error);
+      throw error;
+    }
+  };
 
   const columns: ColumnDef<Teacher>[] = [
     {
@@ -49,7 +60,7 @@ export const useTeacherColumns = () => {
       enableHiding: false,
     },
     {
-      accessorKey: "teacherId",
+      accessorKey: "id",
       header: "Teacher ID",
     },
     {
@@ -82,37 +93,39 @@ export const useTeacherColumns = () => {
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Teacher> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/teachers/profile/${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link href={`/list/teachers/manage?action=edit&id=${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Teacher> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/teachers/profile/${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Teacher"
-                description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
-                onDelete={() => {
-                  console.log("Deleting teacher:", row.original);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/teachers/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Teacher"
+                  description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
+                  onDelete={() => {
+                    deleteTeacher(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
