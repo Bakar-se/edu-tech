@@ -9,6 +9,8 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export type Teacher = {
   id: string;
@@ -22,13 +24,17 @@ export type Teacher = {
 };
 
 export const useTeacherColumns = () => {
+  const router = useRouter();
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
 
   const deleteTeacher = async (teacherId: string) => {
     try {
       const res = await axios.delete(`/api/teachers/delete/${teacherId}`);
-      console.log("Deleted:", res.data);
+      toast.success("Teacher deleted successfully!");
+      if (res.data.success) {
+        router.refresh();
+      }
       return res.data;
     } catch (error) {
       console.error("Error deleting teacher:", error);

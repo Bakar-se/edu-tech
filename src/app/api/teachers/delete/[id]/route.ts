@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { users } from "@clerk/clerk-sdk-node";
 
 const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY!;
 
@@ -38,15 +39,7 @@ export async function DELETE(
     const clerkUserId = teacher.id; // Assuming your model stores Clerk ID here
 
     // Step 2: Delete user from Clerk (if exists)
-    if (clerkUserId) {
-      await fetch(`https://api.clerk.com/v1/users/${clerkUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${CLERK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-      });
-    }
+    await users.deleteUser(clerkUserId);
 
     // Step 3: Delete from your local database
     await prisma.teacher.delete({
