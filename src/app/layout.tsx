@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
+import { ClerkProvider } from "@clerk/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { Query } from "@tanstack/react-query";
+import QueryProvider from "@/lib/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,15 +30,15 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <ConvexClientProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-        </body>
-      </html>
+        <html lang="en">
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <TooltipProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </TooltipProvider>
+          </body>
+        </html>
       </ConvexClientProvider>
     </ClerkProvider>
   );

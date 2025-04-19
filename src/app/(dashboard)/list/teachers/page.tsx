@@ -7,30 +7,26 @@ import { useRouter } from "next/navigation";
 import { useTeacherColumns } from "./columns";
 import axios from "axios";
 import { toast } from "sonner"; // or any toast library you use
+import { useQuery } from "@tanstack/react-query";
 
 const TeacherList = () => {
   const router = useRouter();
   const columns = useTeacherColumns();
-
-  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const response = await axios.get("/api/teachers/getallteachers");
-        setTeachers(response.data.data); // Assuming response.data = { success, data }
-      } catch (error: any) {
-        console.error("Failed to fetch teachers:", error);
-        toast.error("Failed to fetch teachers");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTeachers = async () => {
+    const response = await axios.get("/api/teachers/getallteachers");
+    return response.data.data;
+  };
 
-    fetchTeachers();
-  }, []);
-
+  const {
+    data: teachers,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["teachers"],
+    queryFn: fetchTeachers,
+  });
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
@@ -43,7 +39,7 @@ const TeacherList = () => {
         </Button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <p>Loading...</p>
       ) : (
         <DataTable

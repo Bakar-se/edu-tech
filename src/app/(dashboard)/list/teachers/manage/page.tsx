@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Schema = z.object({
   username: z
@@ -81,6 +82,8 @@ const ManageTeacher = () => {
   const path = search.get("action");
   const id = search.get("id");
   console.log(path, id);
+
+  const queryClient = useQueryClient();
 
   const [date, setDate] = React.useState<Date>(new Date());
 
@@ -182,30 +185,25 @@ const ManageTeacher = () => {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
-    console.log(data);
-    try {
-      let response;
+  const teacherMutation = useMutation({
+    mutationFn: async (data: FormData) => {
       if (action === "create") {
-        // Create teacher
-        response = await axios.post("/api/teachers/create", data);
-        toast.success("Teacher created successfully!");
-        router.push("/list/teachers");
+        return await axios.post("/api/teachers/create", data);
       } else if (action === "edit" && id) {
-        // Update teacher (ensure id exists)
-        response = await axios.put(`/api/teachers/update/${id}`, data);
-        toast.success("Teacher updated successfully!");
-        router.push("/list/teachers");
+        return await axios.put(`/api/teachers/update/${id}`, data);
       } else {
         throw new Error("Invalid action");
       }
-
-      console.log("API response:", response.data);
-      form.reset(); // Reset the form after submission
-    } catch (error: any) {
-      console.error("Error submitting data:", error);
-
-      // Extract the most specific error message
+    },
+    onSuccess: () => {
+      toast.success(
+        `Teacher ${action === "create" ? "created" : "updated"} successfully!`
+      );
+      router.push("/list/teachers");
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
+    onError: (error: any) => {
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
@@ -213,7 +211,12 @@ const ManageTeacher = () => {
         "An unexpected error occurred";
 
       toast.error(message);
-    }
+    },
+  });
+
+  // Usage
+  const onSubmit = (data: FormData) => {
+    teacherMutation.mutate(data);
   };
 
   return (

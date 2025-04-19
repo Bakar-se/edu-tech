@@ -11,6 +11,7 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export type Teacher = {
   id: string;
@@ -28,18 +29,26 @@ export const useTeacherColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
 
-  const deleteTeacher = async (teacherId: string) => {
-    try {
+  const queryClient = useQueryClient();
+
+  const deleteTeacherMutation = useMutation({
+    mutationFn: async (teacherId: string) => {
       const res = await axios.delete(`/api/teachers/delete/${teacherId}`);
-      toast.success("Teacher deleted successfully!");
-      if (res.data.success) {
-        router.refresh();
-      }
       return res.data;
-    } catch (error) {
+    },
+    onSuccess: () => {
+      toast.success("Teacher deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
+    onError: (error: any) => {
       console.error("Error deleting teacher:", error);
-      throw error;
-    }
+      toast.error("Failed to delete teacher");
+    },
+  });
+
+  // Usage
+  const handleDelete = (teacherId: string) => {
+    deleteTeacherMutation.mutate(teacherId);
   };
 
   const columns: ColumnDef<Teacher>[] = [
@@ -125,7 +134,7 @@ export const useTeacherColumns = () => {
                   title="Delete Teacher"
                   description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
                   onDelete={() => {
-                    deleteTeacher(row.original.id);
+                    handleDelete(row.original.id);
                   }}
                 />
               </div>
