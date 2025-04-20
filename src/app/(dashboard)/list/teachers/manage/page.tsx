@@ -91,6 +91,7 @@ const ManageTeacher = () => {
     const fetchTeacher = async () => {
       if (action === "edit" && id) {
         try {
+          // get single teacher api
           const response = await axios.get(`/api/teachers/getteacher/${id}`);
           const teacherData = response.data.data;
 
@@ -188,8 +189,10 @@ const ManageTeacher = () => {
   const teacherMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (action === "create") {
+        // create teacher api
         return await axios.post("/api/teachers/create", data);
       } else if (action === "edit" && id) {
+        // update teacher api
         return await axios.put(`/api/teachers/update/${id}`, data);
       } else {
         throw new Error("Invalid action");

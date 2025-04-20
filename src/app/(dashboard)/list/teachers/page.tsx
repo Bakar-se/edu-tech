@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTeacherColumns } from "./columns";
 import axios from "axios";
@@ -12,7 +12,6 @@ import { useQuery } from "@tanstack/react-query";
 const TeacherList = () => {
   const router = useRouter();
   const columns = useTeacherColumns();
-  const [loading, setLoading] = useState(true);
 
   const fetchTeachers = async () => {
     const response = await axios.get("/api/teachers/getallteachers");
@@ -40,7 +39,7 @@ const TeacherList = () => {
       </div>
 
       {isLoading ? (
-        <p>Loading...</p>
+        <Loader2 className="h-10 w-10 animate-spin" />
       ) : (
         <DataTable
           columns={columns}
