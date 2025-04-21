@@ -54,9 +54,11 @@ model Teacher {
   password  String
   createdAt DateTime  @default(now())
 
-  subjects  Subject[]
+  subjects  Subject[] 
   lessons   Lesson[]
   classes   Class[]
+
+  Subject Subject[] @relation("SubjectTeachers")
 }
 
 model Parent {
@@ -105,10 +107,12 @@ model Class {
 }
 
 model Subject {
-  id       Int       @id @default(autoincrement())
+  id       String      @id @default(uuid())
   name     String    @unique
   teachers Teacher[]
   lessons  Lesson[]
+
+  Teacher Teacher[] @relation("SubjectTeachers")
 }
 
 model Lesson {
@@ -118,7 +122,7 @@ model Lesson {
   startTime  DateTime
   endTime    DateTime
 
-  subjectId  Int
+  subjectId  String
   subject    Subject    @relation(fields: [subjectId], references: [id])
 
   classId    Int

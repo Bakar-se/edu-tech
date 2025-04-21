@@ -19,69 +19,85 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import { Teacher } from "../../teachers/columns";
 
 const subjectSchema = z.object({
-    name: z.string().min(3, "First name must be at least 3 characters"),
-    teachers: z.array(z.string(), {
-        required_error: "At least one teacher must be selected",
-    }),
+    name: z.string().min(3, "Subject name is required"), // Subject name validation
+    teacherId: z.string().min(1, "Teacher ID is required"), // Teacher ID validation
 });
+
+
 
 type SubjectSchema = z.infer<typeof subjectSchema>;
 
 const ManageSubject = () => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const action = searchParams.get("action") || "create";
-    const id = searchParams.get("id");
+    const [action, setAction] = useState<string>("create");
+    const search = useSearchParams();
+    const path = search.get("action");
+    const id = search.get("id");
 
     const queryClient = useQueryClient();
+
     const [teachers, setTeachers] = useState<
-        { id: string; name: string; surname: string }[]
-    >([]);
+        { id: string; name: string; surname: string }[] | null
+    >(null); // Initialize as null to handle undefined gracefully
+
     const [initialData, setInitialData] = useState<any>(null);
 
     const form = useForm<SubjectSchema>({
         resolver: zodResolver(subjectSchema),
         defaultValues: {
             name: "",
-            teachers: [],
-        },
+            teacherId: "",
+        }
     });
 
     // Fetch teachers list
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const res = await axios.get("/api/teachers/list");
-                setTeachers(res.data.teachers);
-            } catch (err) {
-                toast.error("Failed to fetch teachers");
+                const response = await axios.get('/api/teachers');
+                console.log('API response:', response.data); // Log the API response
+                // Ensure the response is an array before setting it
+                if (Array.isArray(response.data)) {
+                    setTeachers(response.data);
+                } else {
+                    console.error('Response is not an array', response.data);
+                    setTeachers([]); // Set an empty array if response is not an array
+                }
+            } catch (error) {
+                console.error("Error fetching teachers:", error);
+                setTeachers([]); // Set empty array in case of error
             }
         };
-        fetchTeachers();
+
+        fetchTeachers(); // Call the function inside useEffect
     }, []);
 
-    // Fetch subject details if editing
+
+
+    // Fetch subject if editing
     useEffect(() => {
-        if (action === "edit" && id) {
+        if (path === "edit" && id) {
+            setAction("edit");
             const fetchSubject = async () => {
                 try {
-                    const res = await axios.get(`/api/subjects/getsubject/${id}`);
-                    const subject = res.data.data;
-
+                    const response = await axios.get(`/api/subjects/getsubject/${id}`);
+                    const subject = response.data.data;
                     setInitialData(subject);
                     form.reset({
                         name: subject.name,
-                        teachers: subject.teachers || [],
+                        teacherId: subject.teachers?.[0]?.id || "", // get first teacher's ID
                     });
-                } catch (err) {
-                    toast.error("Failed to fetch subject data");
+
+                } catch (error) {
+                    console.error("Failed to fetch subject data", error);
                 }
             };
             fetchSubject();
         }
-    }, [action, id, form]);
+    }, [path, id, form]);
 
     const subjectMutation = useMutation({
         mutationFn: async (data: SubjectSchema) => {
@@ -94,15 +110,18 @@ const ManageSubject = () => {
             }
         },
         onSuccess: () => {
-            toast.success(`Subject ${action === "create" ? "created" : "updated"} successfully!`);
+            toast.success(
+                `Subject ${action === "create" ? "created" : "updated"} successfully!`
+            );
             router.push("/list/subjects");
+            form.reset();
             queryClient.invalidateQueries({ queryKey: ["subjects"] });
         },
-        onError: (err: any) => {
+        onError: (error: any) => {
             const message =
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                err?.message ||
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
                 "An unexpected error occurred";
             toast.error(message);
         },
@@ -120,7 +139,7 @@ const ManageSubject = () => {
 
             <Form {...form}>
                 <form className="mt-6 space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                    {/* First Name */}
+                    {/* Name */}
                     <FormField
                         control={form.control}
                         name="name"
@@ -128,7 +147,7 @@ const ManageSubject = () => {
                             <FormItem>
                                 <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter name" {...field} />
+                                    <Input placeholder="Enter subject name" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -138,35 +157,48 @@ const ManageSubject = () => {
                     {/* Teachers Multi-Select */}
                     <FormField
                         control={form.control}
-                        name="teachers"
+                        name="teacherId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Teachers</FormLabel>
-                                <FormControl>
+                                <FormLabel>Teacher</FormLabel>
+
+                                {Array.isArray(teachers) && teachers.length > 0 ? (
+                                    // ✅ Dropdown if parents are available
                                     <select
-                                        multiple
-                                        className="w-full p-2 border rounded-md"
-                                        value={field.value}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                Array.from(e.target.selectedOptions, (option) => option.value)
-                                            )
-                                        }
+                                        {...field}
+                                        className="border rounded p-2 w-full"
+                                        required
                                     >
-                                        {teachers.map((teacher) => (
+                                        <option value="">Select a teacher</option>
+                                        {teachers.map((teacher: any) => (
                                             <option key={teacher.id} value={teacher.id}>
-                                                {teacher.name} {teacher.surname}
+                                                {parent.name}
                                             </option>
                                         ))}
                                     </select>
-                                </FormControl>
+                                ) : (
+                                    // ✅ Text input fallback if no teacher
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        className="border rounded p-2 w-full"
+                                        placeholder="Enter Teacher ID"
+                                        required
+                                    />
+                                )}
+
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {/* Submit Button */}
-                    <Button type="submit" disabled={form.formState.isSubmitting}>
+
+
+                    <Button
+                        type="submit"
+                        className="mt-4"
+                        disabled={form.formState.isSubmitting}
+                    >
                         {form.formState.isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,5 +215,6 @@ const ManageSubject = () => {
         </div>
     );
 };
+
 
 export default ManageSubject;

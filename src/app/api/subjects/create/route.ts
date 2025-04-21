@@ -1,46 +1,64 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { z } from "zod";
 
-export async function POST(req: NextRequest) {
+// Schema for validating the incoming request data
+const subjectSchema = z.object({
+    name: z.string().min(3, "Subject name is required"), // Subject name validation
+    teacherId: z.string().min(1, "Teacher ID is required"), // Teacher ID validation
+});
+
+export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, code, description, teacherId } = body;
 
-        if (!name || !code || !teacherId) {
+        // Validate the incoming request using the Zod schema
+        const parsed = subjectSchema.parse(body);
+
+        // Check if teacherId exists in the database
+        const teacher = await prisma.teacher.findUnique({
+            where: { id: parsed.teacherId },
+        });
+
+        if (!teacher) {
             return NextResponse.json(
-                { success: false, message: "Name, code, and teacherId are required" },
+                { error: "Teacher with this ID does not exist." },
                 { status: 400 }
             );
         }
 
-        // Optional: Check if the subject already exists
-        const existingSubject = await prisma.subject.findFirst({
-            where: {
-                OR: [{ name }, { code }],
+        // Create a new subject and link the teacher to it
+        const newSubject = await prisma.subject.create({
+            data: {
+                name: parsed.name,
+                teachers: {
+                    connect: { id: parsed.teacherId },
+                },
+            },
+            include: {
+                teachers: true, // Include the teacher data in the response
             },
         });
 
-        if (existingSubject) {
+        // Respond with success and the newly created subject
+        return NextResponse.json(
+            { message: "Subject created successfully", data: newSubject },
+            { status: 201 }
+        );
+    } catch (error: any) {
+        console.error(error);
+
+        // Handle validation errors from Zod
+        if (error instanceof z.ZodError) {
             return NextResponse.json(
-                { success: false, message: "Subject with this name or code already exists" },
-                { status: 409 }
+                { error: "Validation error", details: error.errors },
+                { status: 400 }
             );
         }
 
-        const subject = await prisma.subject.create({
-            data: {
-                name,
-                code,
-                description,
-                teacherId,
-            },
-        });
-
-        return NextResponse.json({ success: true, data: subject }, { status: 201 });
-    } catch (error: any) {
-        console.error("[SUBJECT_POST_ERROR]", error);
+        // Generic error handling
         return NextResponse.json(
-            { success: false, message: error?.message || "Failed to create subject" },
+            { error: "Failed to create subject", message: error.message },
             { status: 500 }
         );
     }

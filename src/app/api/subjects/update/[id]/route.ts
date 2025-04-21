@@ -25,11 +25,11 @@ export async function PUT(
             );
         }
 
-        // Check if the new name already exists (excluding current subject)
+        // Check if name already exists, excluding current subject
         const existing = await prisma.subject.findFirst({
             where: {
                 name,
-                NOT: { id: Number(id) },
+                NOT: [{ id }], // id is a string here
             },
         });
 
@@ -40,8 +40,9 @@ export async function PUT(
             );
         }
 
+        // Update subject by string id
         const updatedSubject = await prisma.subject.update({
-            where: { id: Number(id) },
+            where: { id },
             data: { name },
         });
 
