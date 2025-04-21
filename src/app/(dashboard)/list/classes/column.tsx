@@ -6,17 +6,52 @@ import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 export type Class = {
   id: number;
   name: string;
   capacity: number;
   grade: number;
-  supervisor: string;
+  supervisor: {
+    name: string;
+    surname: string;
+  };
 };
 
 // ✅ Wrap columns in a function to accept role dynamically
-export const useClassColumns = (role?: string) => {
+export const useClassColumns = () => {
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
+  console.log(role);
+  const queryClient = useQueryClient();
+
+  // delete teacher api
+
+  const deleteTeacherMutation = useMutation({
+    mutationFn: async (classId: number) => {
+      const res = await axios.delete(`/api/classes/delete/${classId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Class deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting teacher:", error);
+      toast.error("Failed to delete teacher");
+    },
+  });
+
+  // Usage
+  const handleDelete = (classId: number) => {
+    deleteTeacherMutation.mutate(classId);
+  };
+
   const columns: ColumnDef<Class>[] = [
     {
       id: "select",
@@ -63,33 +98,40 @@ export const useClassColumns = (role?: string) => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Supervisor" />
       ),
+      cell: ({ row }: { row: Row<Class> }) => (
+        <div>{`${row.original.supervisor.name} ${row.original.supervisor.surname}`}</div>
+      ),
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Class> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <Edit />
-              </Button>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Class> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link
+                  href={`/list/classes/manage?action=edit&id=${row.original.id}`}
+                >
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Edit />
                   </Button>
-                }
-                title="Delete Class"
-                description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
-                onDelete={() => {
-                  console.log("Deleting Class:", row.original);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Class"
+                  description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
