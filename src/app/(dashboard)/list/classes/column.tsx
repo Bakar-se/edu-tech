@@ -42,8 +42,8 @@ export const useClassColumns = () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     },
     onError: (error: any) => {
-      console.error("Error deleting teacher:", error);
-      toast.error("Failed to delete teacher");
+      console.error("Error deleting classes:", error);
+      toast.error("Failed to delete classes");
     },
   });
 
@@ -104,34 +104,34 @@ export const useClassColumns = () => {
     },
     ...(role === "admin"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Class> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link
-                  href={`/list/classes/manage?action=edit&id=${row.original.id}`}
-                >
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Class> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link
+                href={`/list/classes/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <DeleteDialog
+                trigger={
                   <Button variant="ghost" size="icon">
-                    <Edit />
+                    <Trash className="text-destructive" />
                   </Button>
-                </Link>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Class"
-                  description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
-                  onDelete={() => {
-                    handleDelete(row.original.id);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+                }
+                title="Delete Class"
+                description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
+                onDelete={() => {
+                  handleDelete(row.original.id);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

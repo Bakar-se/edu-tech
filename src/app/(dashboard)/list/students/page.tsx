@@ -29,10 +29,11 @@ const StudentList = () => {
 
   return (
     <div className="container mx-auto px-4 py-10">
-
       <div className='flex justify-between items-center'>
         <h1 className="text-2xl font-semibold mb-4">Students</h1>
-        <Button onClick={() => router.push("/list/students/manage?action=create")} className='mb-4 flex items-center'><PlusCircle /> Register Student</Button>
+        <Button
+          onClick={() => router.push("/list/students/manage?action=create")}
+          className='mb-4 flex items-center'><PlusCircle /> Register Student</Button>
       </div>
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />

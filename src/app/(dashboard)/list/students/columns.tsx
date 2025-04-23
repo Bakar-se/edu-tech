@@ -67,7 +67,7 @@ export const useStudentColumns = () => {
           aria-label="Select all"
         />
       ),
-      cell: ({ row }: { row: Row<Student> }) => (
+      cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}

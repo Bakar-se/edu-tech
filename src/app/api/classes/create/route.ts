@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         name,
         capacity: Number(capacity),
         supervisorId: supervisorId || null,
-        gradeId: gradeId || null,
+        gradeId: gradeId === 0 ? null : gradeId,
       },
     });
 
