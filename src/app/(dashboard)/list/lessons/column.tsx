@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { useUser } from "@clerk/nextjs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
+import Link from "next/link";
 
 export type Lesson = {
   id: number;
@@ -15,7 +20,34 @@ export type Lesson = {
 };
 
 // ✅ Wrap columns in a function to accept role dynamically
-export const useLessonColumns = (role?: string) => {
+export const useLessonColumns = () => {
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
+  console.log(role);
+  const queryClient = useQueryClient();
+
+  // delete lesson api
+
+  const deleteLessonMutation = useMutation({
+    mutationFn: async (lessonId: number) => {
+      const res = await axios.delete(`/api/lessons/delete/${lessonId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Lesson deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting lessons:", error);
+      toast.error("Failed to delete lessons");
+    },
+  });
+
+  // Usage
+  const handleDelete = (lessonId: number) => {
+    deleteLessonMutation.mutate(lessonId);
+  };
+
   const columns: ColumnDef<Lesson>[] = [
     {
       id: "select",
@@ -64,9 +96,13 @@ export const useLessonColumns = (role?: string) => {
           header: () => <div className="text-center">Action</div>,
           cell: ({ row }: { row: Row<Lesson> }) => (
             <div className="flex items-center justify-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <Edit />
-              </Button>
+              <Link
+                href={`/list/lessons/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
               <DeleteDialog
                 trigger={
                   <Button variant="ghost" size="icon">
@@ -76,7 +112,7 @@ export const useLessonColumns = (role?: string) => {
                 title="Delete Lesson"
                 description="This action cannot be undone. This will permanently delete the lesson and remove its data from our servers."
                 onDelete={() => {
-                  console.log("Deleting lesson:", row.original);
+                  handleDelete(row.original.id);
                 }}
               />
             </div>

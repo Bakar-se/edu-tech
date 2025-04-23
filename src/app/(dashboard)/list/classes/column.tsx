@@ -30,9 +30,9 @@ export const useClassColumns = () => {
   console.log(role);
   const queryClient = useQueryClient();
 
-  // delete teacher api
+  // delete classes api
 
-  const deleteTeacherMutation = useMutation({
+  const deleteClassMutation = useMutation({
     mutationFn: async (classId: number) => {
       const res = await axios.delete(`/api/classes/delete/${classId}`);
       return res.data;
@@ -49,7 +49,7 @@ export const useClassColumns = () => {
 
   // Usage
   const handleDelete = (classId: number) => {
-    deleteTeacherMutation.mutate(classId);
+    deleteClassMutation.mutate(classId);
   };
 
   const columns: ColumnDef<Class>[] = [
