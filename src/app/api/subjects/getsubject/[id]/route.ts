@@ -16,12 +16,13 @@ export async function GET(
 
     try {
         const subject = await prisma.subject.findUnique({
-            where: { id: Number(id) },
+            where: { id }, // keep it a string
             include: {
                 teachers: true,
                 lessons: true,
             },
         });
+
 
         if (!subject) {
             return NextResponse.json(

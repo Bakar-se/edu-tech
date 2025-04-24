@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 export type Result = {
   id: number;
@@ -18,8 +23,36 @@ export type Result = {
   score: number;
 };
 
-// ✅ Wrap columns inside a function to pass the role dynamically
-export const useResultColumns = (role?: string) => {
+export const useResultColumns = () => {
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
+  console.log(role);
+  const queryClient = useQueryClient();
+
+  // delete result api
+
+  const deleteResultMutation = useMutation({
+    mutationFn: async (resultId: number) => {
+      const res = await axios.delete(`/api/results/delete/${resultId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Result deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["results"] });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting results:", error);
+      toast.error("Failed to delete results");
+    },
+  });
+
+  // Usage
+  const handleDelete = (resultId: number) => {
+    deleteResultMutation.mutate(resultId);
+  };
+
+  // ✅ Wrap columns inside a function to pass the role dynamically
+
   const columns: ColumnDef<Result>[] = [
     {
       id: "select",
@@ -92,9 +125,13 @@ export const useResultColumns = (role?: string) => {
           header: () => <div className="text-center">Action</div>,
           cell: ({ row }: { row: Row<Result> }) => (
             <div className="flex items-center justify-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <Edit />
-              </Button>
+              <Link
+                href={`/list/results/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
               <DeleteDialog
                 trigger={
                   <Button variant="ghost" size="icon">
@@ -102,9 +139,9 @@ export const useResultColumns = (role?: string) => {
                   </Button>
                 }
                 title="Delete Result"
-                description="This action cannot be undone. This will permanently delete the result and remove their data from our servers."
+                description="This action cannot be undone. This will permanently delete the result and remove its data from our servers."
                 onDelete={() => {
-                  console.log("Deleting result:", row.original);
+                  handleDelete(row.original.id);
                 }}
               />
             </div>

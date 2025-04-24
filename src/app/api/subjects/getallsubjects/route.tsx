@@ -4,24 +4,16 @@ import prisma from "@/lib/prisma";
 export async function GET() {
     try {
         const subjects = await prisma.subject.findMany({
-            orderBy: { id: "desc" }, // Optional: latest first
             include: {
-                teachers: true, // include associated teachers
-                lessons: true,  // include associated lessons
+                teachers: true, // Include associated teachers
             },
         });
 
-        return NextResponse.json(
-            { success: true, data: subjects },
-            { status: 200 }
-        );
+        return NextResponse.json(subjects, { status: 200 });
     } catch (error: any) {
-        console.error("[GET_SUBJECTS_ERROR]", error);
+        console.error("Error fetching subjects:", error);
         return NextResponse.json(
-            {
-                success: false,
-                message: error?.message || "Failed to fetch subjects",
-            },
+            { message: error.message || "Internal Server Error" },
             { status: 500 }
         );
     }
