@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { string } from "zod";
 
 export async function PUT(
     req: NextRequest,
@@ -11,7 +12,7 @@ export async function PUT(
         const { name, startTime, endTime, subjectId, teacherId, day, classId } = body;
 
         const updatedLesson = await prisma.lesson.update({
-            where: { id: Number(id) },
+            where: { id: id.toString() },  // Assuming toString() method extracts the string value
             data: {
                 name,
                 startTime: new Date(startTime), // Assuming startTime and endTime are in string format
