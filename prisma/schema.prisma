@@ -137,11 +137,12 @@ model Exam {
   startTime DateTime
   endTime   DateTime
 
- lessonId String  // Change from Int to String
-  lesson   Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  String  // Change from Int to String
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
 
   results   Result[]
 }
+
 
 model Assignment {
   id        Int      @id @default(autoincrement())

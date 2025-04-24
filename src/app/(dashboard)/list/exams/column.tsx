@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
+
 
 export type Exam = {
   id: number;
@@ -15,8 +21,34 @@ export type Exam = {
   date: string;
 };
 
-// ✅ Wrap columns in a function to accept role dynamically
-export const useExamColumns = (role?: string) => {
+export const useExamColumns = () => {
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
+  console.log(role);
+  const queryClient = useQueryClient();
+
+  // delete exam api
+
+  const deleteExamMutation = useMutation({
+    mutationFn: async (examId: number) => {
+      const res = await axios.delete(`/api/exams/delete/${examId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Exam deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["exams"] });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting exams:", error);
+      toast.error("Failed to delete exams");
+    },
+  });
+
+  // Usage
+  const handleDelete = (examId: number) => {
+    deleteExamMutation.mutate(examId);
+  };
+
   const columns: ColumnDef<Exam>[] = [
     {
       id: "select",
@@ -71,19 +103,23 @@ export const useExamColumns = (role?: string) => {
           header: () => <div className="text-center">Action</div>,
           cell: ({ row }: { row: Row<Exam> }) => (
             <div className="flex items-center justify-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <Edit />
-              </Button>
+              <Link
+                href={`/list/exams/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
               <DeleteDialog
                 trigger={
                   <Button variant="ghost" size="icon">
                     <Trash className="text-destructive" />
                   </Button>
                 }
-                title="Delete Exam"
+                title="Delete Class"
                 description="This action cannot be undone. This will permanently delete the exam and remove its data from our servers."
                 onDelete={() => {
-                  console.log("Deleting exam:", row.original);
+                  handleDelete(row.original.id);
                 }}
               />
             </div>
