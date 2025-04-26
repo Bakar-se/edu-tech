@@ -213,7 +213,7 @@ const ManageLesson = () => {
                                                 )}
                                                 {subjects?.map((subject: Subject) => (
                                                     <SelectItem key={subject.id} value={subject.id}>
-                                                        {subject.name}
+                                                        {`${subject.id} ${subject.name}`}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

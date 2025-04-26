@@ -15,16 +15,16 @@ import { useUser } from "@clerk/nextjs";
 
 export type Exam = {
   id: number;
-  subject: string;
-  class: string;
-  teacher: string;
-  date: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  lessonName: string;
 };
 
 export const useExamColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
-  console.log(role);
+
   const queryClient = useQueryClient();
 
   // delete exam api
@@ -40,11 +40,11 @@ export const useExamColumns = () => {
     },
     onError: (error: any) => {
       console.error("Error deleting exams:", error);
-      toast.error("Failed to delete exams");
+      toast.error("Failed to delete exam");
     },
   });
 
-  // Usage
+
   const handleDelete = (examId: number) => {
     deleteExamMutation.mutate(examId);
   };
@@ -73,27 +73,27 @@ export const useExamColumns = () => {
       enableHiding: false,
     },
     {
-      accessorKey: "subject",
+      accessorKey: "title",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Subject" />
+        <DataTableColumnHeader column={column} title="Exam Title" />
       ),
     },
     {
-      accessorKey: "class", // Updated to match the renamed field
+      accessorKey: "lessonName",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Class" />
+        <DataTableColumnHeader column={column} title="Lesson Name" />
       ),
     },
     {
-      accessorKey: "teacher",
+      accessorKey: "startTime",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Teacher" />
+        <DataTableColumnHeader column={column} title="Start Time" />
       ),
     },
     {
-      accessorKey: "date",
+      accessorKey: "endTime",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Date" />
+        <DataTableColumnHeader column={column} title="End Time" />
       ),
     },
     ...(role === "admin"
@@ -116,11 +116,9 @@ export const useExamColumns = () => {
                     <Trash className="text-destructive" />
                   </Button>
                 }
-                title="Delete Class"
+                title="Delete Exam"
                 description="This action cannot be undone. This will permanently delete the exam and remove its data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
+                onDelete={() => handleDelete(row.original.id)}
               />
             </div>
           ),

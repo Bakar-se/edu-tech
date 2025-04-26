@@ -17,13 +17,6 @@ const AnnouncementList = () => {
     const response = await axios.get("/api/announcements/getallannouncements");
     return response.data.data;
   };
-  const transformedData = announcementsData.map((a) => ({
-    id: a.id,
-    title: a.title,
-    description: "", // or add actual description if available
-    date: new Date(a.date),
-    classId: parseInt(a.class) || null,
-  }));
 
   const {
     data: announcements,
@@ -33,6 +26,7 @@ const AnnouncementList = () => {
     queryKey: ["announcements"],
     queryFn: fetchAnnouncements,
   });
+  console.log(announcements)
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -47,7 +41,7 @@ const AnnouncementList = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={transformedData}
+          data={announcements}
           filterableColumns={["title", "classId", "date"]}
         />)}
     </div>

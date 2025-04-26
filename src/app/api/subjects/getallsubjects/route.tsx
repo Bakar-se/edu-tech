@@ -8,7 +8,7 @@ export async function GET() {
                 teachers: true, // Include associated teachers
             },
         });
-
+        console.log(subjects)
         return NextResponse.json(subjects, { status: 200 });
     } catch (error: any) {
         console.error("Error fetching subjects:", error);

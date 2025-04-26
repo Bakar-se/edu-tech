@@ -27,7 +27,7 @@ const StudentList = () => {
     queryKey: ["events"],
     queryFn: fetchEvents,
   });
-
+  console.log(events)
   return (
     <div className="container mx-auto px-4 py-10">
       <div className='flex justify-between items-center'>

@@ -15,7 +15,7 @@ const SubjectList = () => {
 
   const fetchSubjects = async () => {
     const response = await axios.get("/api/subjects/getallsubjects");
-    return response.data.data;
+    return response.data;
   };
 
   const {
@@ -26,7 +26,7 @@ const SubjectList = () => {
     queryKey: ["subjects"],
     queryFn: fetchSubjects,
   });
-
+  console.log(subjects)
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -41,7 +41,7 @@ const SubjectList = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={subjectsData}
+          data={subjects}
           filterableColumns={["name", "teachers"]} />
       )}
     </div>

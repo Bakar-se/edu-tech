@@ -6,7 +6,7 @@ export async function GET() {
         const exams = await prisma.exam.findMany({
 
         });
-
+        console.log(exams)
         return NextResponse.json(exams, { status: 200 });
     } catch (error) {
         console.error("Error fetching exams:", error);

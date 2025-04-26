@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect } from "react";
 import { z } from "zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -70,11 +71,11 @@ const ManageAssignment = () => {
     const assignmentMutation = useMutation({
         mutationFn: async (data: FormData) => {
             if (action === "create") {
-                // create assignment api
-                console.log(data);
+
                 return await axios.post("/api/assignments/create", data);
+
             } else if (action === "edit" && id) {
-                // update class api
+
                 return await axios.put(`/api/assignments/update/${id}`, data);
             } else {
                 throw new Error("Invalid action");
@@ -92,12 +93,29 @@ const ManageAssignment = () => {
             const message =
                 error?.response?.data?.message ||
                 error?.response?.data?.error ||
-                error?.message ||
-                "An unexpected error occurred";
-
+                error?.message || "An unexpected error occurred";
             toast.error(message);
         },
     });
+
+    const onSubmit = (data: FormData) => {
+        const now = new Date();
+
+        if (data.startDate < now || data.dueDate < now) {
+            toast.error("Start and end date must be in the future");
+            return;
+        }
+        if (data.startDate >= data.dueDate) {
+            toast.error("End Date must be after Start Date");
+            return;
+        }
+
+        assignmentMutation.mutate(data);
+    };
+
+    const minDateTime = new Date().toISOString().slice(0, 16);
+
+
 
 
     useEffect(() => {
@@ -116,17 +134,18 @@ const ManageAssignment = () => {
         }
     }, [action, id, form]);
 
-    const onSubmit = (data: FormData) => {
-        assignmentMutation.mutate(data);
-    };
+
 
     return (
         <div className="p-4">
             <h1 className="text-2xl font-semibold">
-                {action === "edit" ? "Edit" : "Create"} Assignment</h1>
+                {action === "edit" ? "Edit" : "Create"} Assignment
+            </h1>
             <Form {...form}>
-                <form className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
-                    onSubmit={form.handleSubmit(onSubmit)}>
+                <form
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                >
                     <FormField
                         control={form.control}
                         name="title"
@@ -155,7 +174,14 @@ const ManageAssignment = () => {
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent>
-                                        <Calendar selected={field.value} onSelect={field.onChange} />
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={(date) => {
+                                                field.onChange(date);
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                        />
                                     </PopoverContent>
                                 </Popover>
                                 <FormMessage />
@@ -179,7 +205,15 @@ const ManageAssignment = () => {
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent>
-                                        <Calendar selected={field.value} onSelect={field.onChange} />
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={(date) => {
+                                                field.onChange(date);
+                                            }}
+                                            disabled={(date) => date < new Date()}
+                                        />
+
                                     </PopoverContent>
                                 </Popover>
                                 <FormMessage />
@@ -200,8 +234,10 @@ const ManageAssignment = () => {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {lessonsLoading && <Loader2 className="animate-spin mx-auto" />}
-                                        {lessons?.map((lesson: any) => (
+                                        {lessonsLoading && (
+                                            <Loader2 className="animate-spin mx-auto" />
+                                        )}
+                                        {lessons?.map((lesson: Lesson) => (
                                             <SelectItem key={lesson.id} value={lesson.id}>
                                                 {lesson.name}
                                             </SelectItem>

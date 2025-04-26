@@ -16,7 +16,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export type Subject = {
   id: number;
   name: string;
-  teachers: string[];
+  teachers: {
+    id: string;
+    name: string;
+    surname: string;
+  }[]
 };
 
 // ✅ Wrap columns inside a function to get role dynamically
@@ -82,6 +86,19 @@ export const useSubjectColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Teachers" />
       ),
+      cell: ({ row }: { row: Row<Subject> }) => {
+        const teachers = row.original.teachers || [];
+
+        return (
+          <div className="flex flex-col">
+            {teachers.map((teacher) => (
+              <span key={teacher.id}>
+                {teacher.name} {teacher.surname}
+              </span>
+            ))}
+          </div>
+        );
+      }
     },
     ...(role === "admin"
       ? [
