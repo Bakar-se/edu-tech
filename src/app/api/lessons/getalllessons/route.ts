@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
@@ -9,14 +9,14 @@ export async function GET() {
                 teacher: true,
                 class: true,
             },
+            orderBy: {
+                startTime: "asc",
+            },
         });
 
-        return NextResponse.json({ data: lessons }, { status: 200 });
-    } catch (error) {
-        console.error("Error fetching lessons:", error);
-        return NextResponse.json(
-            { message: "Internal Server Error" },
-            { status: 500 }
-        );
+        return NextResponse.json(lessons, { status: 200 });
+    } catch (error: any) {
+        console.error("Error fetching subjects:", error);
+        return NextResponse.json({ message: "Failed to fetch lessons", error }, { status: 500 });
     }
 }
