@@ -72,6 +72,7 @@ const Schema = z.object({
   bloodType: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], {
     message: "Blood type is required",
   }),
+
 });
 type FormData = z.infer<typeof Schema>;
 

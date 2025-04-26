@@ -1,9 +1,10 @@
 "use client";
+
 import React from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Loader2, PlusCircle } from "lucide-react";
-import { classesData, examsData } from "@/lib/data";
+
 
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -12,38 +13,51 @@ import { useExamColumns } from "./column";
 
 const ExamList = () => {
   const router = useRouter();
-  const columns = useExamColumns()
+  const columns = useExamColumns();
 
-  const fetchLessons = async () => {
-    const response = await axios.get("/api/exmas/getallexams");
-    return response.data.data;
+  const fetchExams = async () => {
+    const response = await axios.get("/api/exams/getallexams"); // fixed endpoint
+    const exams = response.data;
+
+    return exams.map((exam: any) => ({
+      id: exam.id,
+      title: exam.title,
+      startTime: exam.startTime,
+      endTime: exam.endTime,
+      lessonName: exam.lesson?.name || "No lesson",
+    }));
   };
 
-  const {
-    data: exams,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: exams, isLoading, isError } = useQuery({
     queryKey: ["exams"],
-    queryFn: fetchLessons,
+    queryFn: fetchExams, // fixed here
   });
 
+  console.log(exams);
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <div className='flex justify-between items-center'>
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Exams</h1>
         <Button
           onClick={() => router.push("/list/exams/manage?action=create")}
           className="mb-4 flex items-center"
-        ><PlusCircle /> Register Exam</Button>
+        >
+          <PlusCircle className="mr-2" /> Register Exam
+        </Button>
       </div>
+
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />
       ) : (
-        <DataTable columns={columns} data={examsData} filterableColumns={["subject", "class", "teacher", "date"]} />)}
+        <DataTable
+          columns={columns}
+          data={exams || []}
+          filterableColumns={["title", "lessonName", "startTime", "endTime"]} // fixed columns
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default ExamList
+export default ExamList;

@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect } from "react";
 import { z } from "zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -78,11 +79,8 @@ const ManageAssignment = () => {
   const assignmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (action === "create") {
-        // create assignment api
-        console.log(data);
         return await axios.post("/api/assignments/create", data);
       } else if (action === "edit" && id) {
-        // update class api
         return await axios.put(`/api/assignments/update/${id}`, data);
       } else {
         throw new Error("Invalid action");
@@ -102,10 +100,26 @@ const ManageAssignment = () => {
         error?.response?.data?.error ||
         error?.message ||
         "An unexpected error occurred";
-
       toast.error(message);
     },
   });
+
+  const onSubmit = (data: FormData) => {
+    const now = new Date();
+
+    if (data.startDate < now || data.dueDate < now) {
+      toast.error("Start and end date must be in the future");
+      return;
+    }
+    if (data.startDate >= data.dueDate) {
+      toast.error("End Date must be after Start Date");
+      return;
+    }
+
+    assignmentMutation.mutate(data);
+  };
+
+  const minDateTime = new Date().toISOString().slice(0, 16);
 
   useEffect(() => {
     if (action === "edit" && id) {
@@ -123,118 +137,119 @@ const ManageAssignment = () => {
     }
   }, [action, id, form]);
 
-  const onSubmit = (data: FormData) => {
-    assignmentMutation.mutate(data);
-  };
-
   return (
     <div className="p-4">
       <h1 className="text-2xl font-semibold">
         {action === "edit" ? "Edit" : "Create"} Assignment
       </h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <Input placeholder="Enter title" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <Input placeholder="Enter title" {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Start Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant="outline">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {format(field.value, "PPP")}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Calendar
-                        selected={field.value}
-                        onSelect={field.onChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Due Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant="outline">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {format(field.value, "PPP")}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Calendar
-                        selected={field.value}
-                        onSelect={field.onChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lessonId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lesson</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+          <FormField
+            control={form.control}
+            name="startDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Start Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a lesson" />
-                      </SelectTrigger>
+                      <Button variant="outline">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(field.value, "PPP")}
+                      </Button>
                     </FormControl>
-                    <SelectContent>
-                      {lessonsLoading && (
-                        <Loader2 className="animate-spin mx-auto" />
-                      )}
-                      {lessons?.map((lesson: any) => (
-                        <SelectItem key={lesson.id} value={lesson.id}>
-                          {lesson.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                      }}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <Button
-            className="mt-4"
-            type="submit"
-            disabled={form.formState.isSubmitting}
-          >
+          <FormField
+            control={form.control}
+            name="dueDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Due Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(field.value, "PPP")}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                      }}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="lessonId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lesson</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a lesson" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {lessonsLoading && (
+                      <Loader2 className="animate-spin mx-auto" />
+                    )}
+                    {lessons?.map((lesson: Lesson) => (
+                      <SelectItem key={lesson.id} value={lesson.id}>
+                        {lesson.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

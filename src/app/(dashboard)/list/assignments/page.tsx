@@ -16,6 +16,7 @@ const AssignmentList = () => {
   const fetchLessons = async () => {
     const response = await axios.get("/api/assignments/getallassignments");
     return response.data;
+    return response.data;
   };
 
   const {

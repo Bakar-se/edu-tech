@@ -8,6 +8,7 @@ export async function GET() {
                 startTime: "desc", // Sort by createdAt, assuming you've added it to the schema
             },
         });
+        console.log(events)
         return NextResponse.json(
             { success: true, data: events },
             { status: 200 }

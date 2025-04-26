@@ -9,7 +9,7 @@ export async function GET() {
                 class: true, // This should match the relation name in your schema
             },
         });
-
+        console.log(announcements)
         return NextResponse.json(
             { success: true, data: announcements },
             { status: 200 }
