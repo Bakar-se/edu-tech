@@ -13,10 +13,9 @@ const AssignmentList = () => {
   const router = useRouter();
   const columns = useAssignmentColumns();
 
-
   const fetchLessons = async () => {
     const response = await axios.get("/api/assignments/getallassignments");
-    return response.data.data;
+    return response.data;
   };
 
   const {
@@ -27,7 +26,6 @@ const AssignmentList = () => {
     queryKey: ["assignments"],
     queryFn: fetchLessons,
   });
-
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -43,8 +41,13 @@ const AssignmentList = () => {
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />
       ) : (
-        <DataTable columns={columns} data={assignmentsData} filterableColumns={["subject", "class", "teacher", "dueDate"]} />)}
+        <DataTable
+          columns={columns}
+          data={assignments}
+          filterableColumns={["subject", "class", "teacher", "dueDate"]}
+        />
+      )}
     </div>
-  )
+  );
 };
 export default AssignmentList;
