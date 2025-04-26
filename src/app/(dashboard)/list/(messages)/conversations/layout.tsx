@@ -18,7 +18,7 @@ const ConversationsLayout = ({ children }: Props) => {
     api.conversations.get,
     userId ? { clerkId: userId } : "skip"
   );
-
+  console.log(conversations);
   return (
     <>
       <ItemList title="Conversations" action={<CreateGroupDialog />}>
@@ -30,23 +30,24 @@ const ConversationsLayout = ({ children }: Props) => {
             </p>
           ) : (
             conversations.map((conversations: any) => {
-              return conversations.conversation.isGroup ? <GroupConversationItem
-              key={conversations.conversation._id}
-              id={conversations.conversation._id}
-              name={conversations.conversation.name || ""}
-              lastMessageSender={conversations.lastMessage?.sender}
-              lastMessageContent={conversations.lastMessage?.content}
-              unseenCount={conversations.unseenCount}
-            /> : (
+              return conversations.conversation.isGroup ? (
+                <GroupConversationItem
+                  key={conversations.conversation._id}
+                  id={conversations.conversation._id}
+                  name={conversations.conversation.name || ""}
+                  lastMessageSender={conversations.lastMessage?.sender}
+                  lastMessageContent={conversations.lastMessage?.content}
+                  unseenCount={conversations.unseenCount}
+                />
+              ) : (
                 <DMConversationItem
                   key={conversations.conversation._id}
                   id={conversations.conversation._id}
-                  username={conversations.otherMember.username || ""}
-                  imageUrl={conversations.otherMember.imageUrl}
+                  username={conversations?.otherMember?.username || ""}
+                  imageUrl={conversations?.otherMember?.imageUrl}
                   lastMessageSender={conversations.lastMessage?.sender}
                   lastMessageContent={conversations.lastMessage?.content}
-              unseenCount={conversations.unseenCount}
-
+                  unseenCount={conversations.unseenCount}
                 />
               );
             })

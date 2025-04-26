@@ -31,16 +31,20 @@ const DMConversationItem = (props: Props) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col truncate">
-            <h4 className="truncate">{props.username}</h4>
-            {props.lastMessageSender && props.lastMessageContent ? (<span className="text-sm text-muted-foreground flex truncate overflow-ellipsis">
-              <p className="font-semibold">
-                {props.lastMessageSender}
-                {":"}&nbsp;
+            <h4 className="truncate">{props?.username}</h4>
+            {props.lastMessageSender && props.lastMessageContent ? (
+              <span className="text-sm text-muted-foreground flex truncate overflow-ellipsis">
+                <p className="font-semibold">
+                  {props.lastMessageSender}
+                  {":"}&nbsp;
+                </p>
+                <p className="truncate overflow-ellipsis"></p>
+              </span>
+            ) : (
+              <p className="text-sm text-muted-foreground truncate">
+                Start conversation!
               </p>
-              <p className="truncate overflow-ellipsis"></p>
-            </span>) : (<p className="text-sm text-muted-foreground truncate">
-              Start conversation!
-            </p>)}
+            )}
           </div>
         </div>
         {props.unseenCount ? <Badge>{props.unseenCount}</Badge> : null}
