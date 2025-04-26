@@ -32,7 +32,8 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Class } from "../../classes/column";
 
 const Schema = z.object({
     title: z
@@ -86,6 +87,15 @@ const ManageEvent = () => {
             classId: null,
         },
     });
+    const fetchClasses = async () => {
+        const response = await axios.get("/api/classes/getallclasses");
+        return response.data.data;
+    };
+    const { data: classes, isLoading: isClassesLoading, isError: isClassesError } = useQuery({
+        queryKey: ["classes"],
+        queryFn: fetchClasses,
+    });
+
 
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>(new Date());
@@ -327,7 +337,42 @@ const ManageEvent = () => {
                                 </FormItem>
                             )}
                         />
+                        <div className="flex flex-col gap-2">
+                            <FormField
+                                control={form.control}
+                                name="classId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Class</FormLabel>
+                                        <Select
+                                            onValueChange={(value) => field.onChange(Number(value))}
+                                            value={field.value?.toString()}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Class" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {isClassesLoading && (
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin flex justify-center" />
+                                                )}
+                                                {classes?.map((cls: Class) => (
+                                                    <SelectItem key={cls.id} value={cls.id.toString()}>
+                                                        {cls.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage>
+                                            {form.formState.errors.classId?.message}
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
+
 
                     <Button type="submit" className="mt-4" disabled={form.formState.isSubmitting}>
                         {form.formState.isSubmitting ? (
