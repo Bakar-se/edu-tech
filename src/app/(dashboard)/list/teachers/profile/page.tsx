@@ -5,6 +5,7 @@ import { Performance } from "@/components/Performance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { convertToCalendarEvents } from "@/lib/convertToCalendarEvents";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -54,6 +55,7 @@ const SingleTeacherPage = () => {
           const response = await axios.get(`/api/teachers/getteacher/${id}`);
           const teacherData = response.data.data;
           setTeacher(teacherData);
+          console.log(teacherData);
         } catch (error) {
           console.error("Error fetching teacher:", error);
         }
@@ -63,6 +65,8 @@ const SingleTeacherPage = () => {
     fetchTeacher();
   }, [id]);
 
+  const events = convertToCalendarEvents(teacher?.lessons || []);
+  console.log(events);
   return (
     <div>
       <div className="flex flex-col lg:flex-row gap-4 p-4">
@@ -159,7 +163,7 @@ const SingleTeacherPage = () => {
             <h1 className="leading-none font-semibold">
               Teacher&apos;s Schedule
             </h1>
-            <BigCalendar />
+            <BigCalendar events={events} />
           </div>
         </div>
         {/* RIGHT */}
