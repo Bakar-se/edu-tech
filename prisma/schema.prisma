@@ -116,7 +116,7 @@ model Lesson {
   id        String   @id @default(uuid())
   name      String
   startTime DateTime
-  endTime   DateTime
+  endTime   DateTime?
   day       String?
   subjectId String
   teacherId String

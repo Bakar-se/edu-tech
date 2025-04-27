@@ -96,7 +96,7 @@ export const menuItems = [
             {
                 icon: <CircleUserRound />,
                 label: "Profile",
-                href: "/profile",
+                href: "/other/profiles",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
