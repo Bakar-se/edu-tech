@@ -4,24 +4,29 @@ import prisma from "@/lib/prisma";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, teacherId } = body;
+    const { name, teacherIds, startTime, endTime } = body;
+
     // Basic validation
-    if (!name || !teacherId) {
+    if (!name || !teacherIds || teacherIds.length === 0 || !startTime || !endTime) {
       return NextResponse.json(
-        { message: "Missing required fields: name or teacherId" },
+        { message: "Missing required fields: name, teacherIds, startTime, or endTime" },
         { status: 400 }
       );
     }
 
-    // Create subject with teacher connection
+    // Create subject with multiple teachers
     const newSubject = await prisma.subject.create({
       data: {
         name,
+        startTime: new Date(startTime) as Date,
+        endTime: new Date(endTime) as Date,
         teachers: {
-          connect: [{ id: teacherId }],
+          connect: teacherIds.map((id: string) => ({ id })),
         },
       },
     });
+
+
 
     return NextResponse.json(newSubject, { status: 201 });
   } catch (error: any) {
