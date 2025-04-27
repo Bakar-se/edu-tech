@@ -85,6 +85,8 @@ model Grade {
   grade    String
   level    Float       @unique
   students Student[]
+
+  classes Class[]
 }
 
 model Class {
@@ -97,6 +99,8 @@ model Class {
   lessons       Lesson[]
   events        Event[]
   announcements Announcement[]
+ gradeId      Int?
+  grade        Grade? @relation(fields: [gradeId], references: [id])
 }
 
 model Subject {
