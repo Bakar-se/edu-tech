@@ -110,7 +110,7 @@ model Lesson {
   id        String   @id @default(uuid())
   startTime DateTime
   endTime   DateTime
-  day       String?
+  day       String[]
   subjectId String
   teacherId String
   classId   Int      // Change this to `Int` to match the `Class` model's `id` type

@@ -1,6 +1,6 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
+import moment from "moment"; // Import moment
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,8 @@ import { Badge } from "@/components/ui/badge";
 const subjectSchema = z.object({
   name: z.string().min(3, "Subject name is required"),
   teacherIds: z.array(z.string().min(1, "Teacher ID is required")),
+  startTime: z.string().min(1, "Start time is required"), // Add startTime
+  endTime: z.string().min(1, "End time is required"), // Add endTime
 });
 
 type SubjectSchema = z.infer<typeof subjectSchema>;
@@ -58,6 +60,8 @@ const ManageSubject = () => {
     defaultValues: {
       name: "",
       teacherIds: [],
+      startTime: moment().format("YYYY-MM-DDTHH:mm"), // Set default start time to current date/time
+      endTime: moment().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // Set default end time 1 hour after start time
     },
   });
 
@@ -87,6 +91,14 @@ const ManageSubject = () => {
             "teacherIds",
             subject.teachers?.map((t: Teacher) => t.id) || []
           );
+          form.setValue(
+            "startTime",
+            moment(subject.startTime).format("YYYY-MM-DDTHH:mm")
+          );
+          form.setValue(
+            "endTime",
+            moment(subject.endTime).format("YYYY-MM-DDTHH:mm")
+          );
         } catch (error) {
           console.error("Error fetching subject:", error);
         }
@@ -100,6 +112,7 @@ const ManageSubject = () => {
   const subjectMutation = useMutation({
     mutationFn: async (data: SubjectSchema) => {
       if (action === "create") {
+        console.log(data);
         return await axios.post("/api/subjects/create", data);
       } else if (action === "edit" && id) {
         return await axios.put(`/api/subjects/update/${id}`, data);
@@ -255,6 +268,44 @@ const ManageSubject = () => {
                       </PopoverContent>
                     </Popover>
                   )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Start Time */}
+          <FormField
+            control={form.control}
+            name="startTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Start Time</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    placeholder="Select start time"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* End Time */}
+          <FormField
+            control={form.control}
+            name="endTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>End Time</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    placeholder="Select end time"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

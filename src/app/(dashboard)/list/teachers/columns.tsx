@@ -78,15 +78,15 @@ export const useTeacherColumns = () => {
       enableHiding: false,
     },
     {
-      accessorKey: "id",
+      accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Info" />
+        <DataTableColumnHeader column={column} title="First name" />
       ),
     },
     {
-      accessorKey: "name",
+      accessorKey: "surname",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
+        <DataTableColumnHeader column={column} title="Last name" />
       ),
     },
     {

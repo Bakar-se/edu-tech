@@ -25,17 +25,18 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { Subject } from "../../subjects/column";
-import { Teacher } from "../../teachers/columns";
-import { Class } from "../../classes/column";
+import type { Teacher } from "../../teachers/columns";
+import type { Class } from "../../classes/column";
+import { Subject } from "@prisma/client";
+import moment from "moment";
 
 const Schema = z.object({
-  name: z.string().min(3).max(50),
   startTime: z.string().min(1),
   endTime: z.string().min(1),
   subjectId: z.string().min(1),
   teacherId: z.string().min(1),
   classId: z.number().nullable().optional(),
+  day: z.array(z.string()).min(1),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -50,12 +51,12 @@ const ManageLesson = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      name: "",
       startTime: "",
       endTime: "",
       subjectId: "",
       teacherId: "",
       classId: null,
+      day: [],
     },
   });
 
@@ -97,14 +98,16 @@ const ManageLesson = () => {
       if (action === "edit" && id) {
         try {
           const response = await axios.get(`/api/lessons/getlesson/${id}`);
-          const lessonData = response.data.data;
+          const lessonData = response.data;
+          console.log(lessonData);
+
           form.reset({
-            name: lessonData.name,
-            startTime: lessonData.startTime,
-            endTime: lessonData.endTime,
+            startTime: moment(lessonData.startTime).format("HH:mm"), // 24-hour format
+            endTime: moment(lessonData.endTime).format("HH:mm"),
             subjectId: lessonData.subjectId,
             teacherId: lessonData.teacherId,
             classId: lessonData.classId ?? null,
+            day: lessonData.day || [], // also set day array
           });
         } catch (error) {
           console.error("Error fetching lesson:", error);
@@ -119,6 +122,7 @@ const ManageLesson = () => {
       if (action === "create") {
         return await axios.post("/api/lessons/create", data);
       } else if (action === "edit" && id) {
+        console.log(data);
         return await axios.put(`/api/lessons/update/${id}`, data);
       } else {
         throw new Error("Invalid action");
@@ -155,21 +159,72 @@ const ManageLesson = () => {
             <div className="flex flex-col gap-2">
               <FormField
                 control={form.control}
-                name="name"
-                render={() => (
+                name="day"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Lesson Name</FormLabel>
-                    <Input
-                      {...form.register("name")}
-                      placeholder="Enter lesson name"
-                    />
+                    <FormLabel>Days</FormLabel>
+                    <div className="space-y-2">
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            // Add the selected value to the array if it's not already there
+                            const newValue = field.value.includes(value)
+                              ? field.value.filter(
+                                  (day: string) => day !== value
+                                )
+                              : [...field.value, value];
+                            field.onChange(newValue);
+                          }}
+                          value={field.value[0] || ""}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select days" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[
+                              "Monday",
+                              "Tuesday",
+                              "Wednesday",
+                              "Thursday",
+                              "Friday",
+                            ].map((day) => (
+                              <SelectItem key={day} value={day}>
+                                {day}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {field.value.map((day: string) => (
+                          <div
+                            key={day}
+                            className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-md"
+                          >
+                            {day}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                field.onChange(
+                                  field.value.filter((d: string) => d !== day)
+                                );
+                              }}
+                              className="text-secondary-foreground/70 hover:text-secondary-foreground"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <FormMessage>
-                      {form.formState.errors.name?.message}
+                      {form.formState.errors.day?.message}
                     </FormMessage>
                   </FormItem>
                 )}
               />
             </div>
+
             <div className="flex flex-col gap-2">
               <FormField
                 control={form.control}
@@ -250,7 +305,7 @@ const ManageLesson = () => {
                       <SelectContent>
                         {teachers?.map((teacher: Teacher) => (
                           <SelectItem key={teacher.id} value={teacher.id}>
-                            {`${teacher.name}`}
+                            {`${teacher.name} ${teacher.surname}`}
                           </SelectItem>
                         ))}
                       </SelectContent>
