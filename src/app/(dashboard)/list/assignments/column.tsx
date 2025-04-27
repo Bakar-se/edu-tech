@@ -23,7 +23,6 @@ export type Assignment = {
 export const useAssignmentColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
-  console.log(role);
   const queryClient = useQueryClient();
 
   // delete classes api
@@ -31,7 +30,7 @@ export const useAssignmentColumns = () => {
   const deleteAssignmentMutation = useMutation({
     mutationFn: async (assignmentId: number) => {
       const res = await axios.delete(`/api/assignments/delete/${assignmentId}`);
-      return res.data;
+      return res.data.data;
     },
     onSuccess: () => {
       toast.success("Assignment deleted successfully!");
@@ -97,34 +96,34 @@ export const useAssignmentColumns = () => {
     },
     ...(role === "teacher"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Assignment> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link
-                href={`/list/assignments/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Assignment> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link
+                  href={`/list/assignments/manage?action=edit&id=${row.original.id}`}
+                >
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Edit />
                   </Button>
-                }
-                title="Delete Class"
-                description="This action cannot be undone. This will permanently delete the assignment and remove its data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Class"
+                  description="This action cannot be undone. This will permanently delete the assignment and remove its data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

@@ -43,7 +43,7 @@ const Schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   startDate: z.date(),
   dueDate: z.date(),
-  subjectId: z.string().min(1, { message: "Lesson ID is required" }),
+  subjectId: z.string().min(1, { message: "Subject is required" }),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -57,6 +57,10 @@ const ManageAssignment = () => {
   const fetchSubjects = async () => {
     const response = await axios.get("/api/subjects/getallsubjects");
     return response.data;
+  };
+  const fetchAssignments = async () => {
+    const response = await axios.get("/api/assignments/getallassignments");
+    return response.data.data;
   };
 
   const queryClient = useQueryClient();
