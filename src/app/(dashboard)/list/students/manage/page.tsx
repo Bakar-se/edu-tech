@@ -85,127 +85,16 @@ type FormData = z.infer<typeof Schema>;
 
 const ManageStudent = () => {
     const router = useRouter();
-    const [action, setAction] = React.useState<string>("create");
+
     const search = useSearchParams();
     const path = search.get("action");
     const id = search.get("id");
-    console.log(path, id);
+
 
     const queryClient = useQueryClient();
 
     const [date, setDate] = React.useState<Date>(new Date());
-    const [parents, setParents] = React.useState<any[]>([]);
-
-    // Fetch classes to populate the class dropdown
-    const fetchClasses = async () => {
-        const response = await axios.get("/api/classes/getallclasses");
-        return response.data.data;
-    };
-
-    const {
-        data: classes,
-        isLoading,
-        isError,
-    } = useQuery({
-        queryKey: ["classes"],
-        queryFn: fetchClasses,
-    });
-
-    useEffect(() => {
-        const fetchParents = async () => {
-            try {
-                const response = await axios.get('/api/parents');
-                console.log('API response:', response.data); // Log the API response
-                // Ensure the response is an array before setting it
-                if (Array.isArray(response.data)) {
-                    setParents(response.data);
-                } else {
-                    console.error('Response is not an array', response.data);
-                    setParents([]); // Set an empty array if response is not an array
-                }
-            } catch (error) {
-                console.error("Error fetching parents:", error);
-                setParents([]); // Set empty array in case of error
-            }
-        };
-
-        fetchParents(); // Call the function inside useEffect
-    }, []);
-
-
-    useEffect(() => {
-        if (path) {
-            setAction(path);
-        }
-    }, [path]);
-
-
-    useEffect(() => {
-        const fetchStudent = async () => {
-            if (action === "edit" && id) {
-                try {
-                    const response = await axios.get(`/api/student/getstudent/${id}`);
-                    const studentData = response.data.data;
-
-                    // Convert birthday string to Date object if it exists
-                    const birthday = studentData.birthday
-                        ? new Date(studentData.birthday)
-                        : undefined;
-                    console.log(studentData);
-                    // Reset form values with the fetched data
-                    form.reset({
-                        username: studentData.username || "",
-                        firstname: studentData.name || "",
-                        lastname: studentData.surname || "",
-                        email: studentData.email || "",
-                        phone: studentData.phone || "",
-                        address: studentData.address || "",
-                        bloodType: studentData.bloodType || "",
-                        password: studentData.password || "",
-                        sex: studentData.sex || undefined,
-                        birthday: birthday,
-                        parentId: studentData.parentId || "",
-                        classId: studentData.classId,
-                    });
-                    setDate(birthday || new Date());
-                    form.setValue("sex", studentData.sex); // Set the gender value
-                    form.setValue("bloodType", studentData.bloodType);
-                } catch (error) {
-                    console.error("Error fetching student:", error);
-                }
-            }
-        };
-
-        fetchStudent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [action, id]);
-
-    const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ];
-    const startYear = getYear(new Date()) - 100;
-    const endYear = getYear(new Date()) + 100;
-    const years = Array.from(
-        { length: endYear - startYear + 1 },
-        (_, i) => startYear + i
-    );
-
-    useEffect(() => {
-        if (path) {
-            setAction(path);
-        }
-    }, [path]);
+    const [action, setAction] = React.useState<string>(path || "create");
 
     const form = useForm<FormData>({
         resolver: zodResolver(Schema),
@@ -225,6 +114,82 @@ const ManageStudent = () => {
         },
     });
 
+    // Fetch parents
+    const fetchParents = async () => {
+        const response = await axios.get("/api/parents/getallparents");
+        return response.data.data;
+    };
+
+    // Fetch classes
+    const fetchClasses = async () => {
+        const response = await axios.get("/api/classes/getallclasses");
+        return response.data.data;
+    };
+
+    const { data: parents, isLoading: isParentsLoading, isError: isParentsError } = useQuery({
+        queryKey: ["parents"],
+        queryFn: fetchParents,
+    });
+
+    const { data: classes, isLoading: isClassesLoading, isError: isClassesError } = useQuery({
+        queryKey: ["classes"],
+        queryFn: fetchClasses,
+    });
+
+
+    useEffect(() => {
+        if (path) {
+            setAction(path);
+        }
+    }, [path]);
+
+
+    useEffect(() => {
+        const fetchStudent = async () => {
+            if (action === "edit" && id) {
+                try {
+                    const response = await axios.get(`/api/student/getstudent/${id}`);
+                    const studentData = response.data.data;
+
+
+                    const birthday = studentData.birthday
+                        ? new Date(studentData.birthday)
+                        : undefined;
+
+                    form.reset({
+                        username: studentData.username || "",
+                        firstname: studentData.name || "",
+                        lastname: studentData.surname || "",
+                        email: studentData.email || "",
+                        phone: studentData.phone || "",
+                        address: studentData.address || "",
+                        bloodType: studentData.bloodType || "",
+                        password: studentData.password || "",
+                        sex: studentData.sex || undefined,
+                        birthday: birthday,
+                        parentId: studentData.parentId || "",
+                        classId: studentData.classId || "",
+                    });
+
+                    setDate(birthday || new Date());
+                }
+                catch (error) {
+                    console.error("Error fetching student:", error);
+                }
+            }
+        };
+
+        fetchStudent();
+    }, [action, id, form]);
+
+    useEffect(() => {
+        if (path) {
+            setAction(path);
+        }
+    }, [path]);
+
+
+
     const handleMonthChange = (month: string) => {
         const newDate = setMonth(date, months.indexOf(month));
         setDate(newDate);
@@ -235,28 +200,30 @@ const ManageStudent = () => {
         setDate(newDate);
     };
 
-    const handleSelect = (selectedData: Date | undefined) => {
-        if (selectedData) {
-            setDate(selectedData);
-            form.setValue("birthday", selectedData);
+    const handleSelect = (selectedDate: Date | undefined) => {
+        if (selectedDate) {
+            setDate(selectedDate);
+            form.setValue("birthday", selectedDate);
         }
     };
 
     const studentMutation = useMutation({
         mutationFn: async (data: FormData) => {
+            const payload = {
+                ...data,
+                birthday: data.birthday ? new Date(data.birthday).toISOString() : undefined,
+            };
+
             if (action === "create") {
-                console.log(data)
-                return await axios.post("/api/students/create", data);
+                return await axios.post("/api/students/create", payload);
             } else if (action === "edit" && id) {
-                return await axios.put(`/api/students/update/${id}`, data);
+                return await axios.put(`/api/students/update/${id}`, payload);
             } else {
                 throw new Error("Invalid action");
             }
         },
         onSuccess: () => {
-            toast.success(
-                `Student ${action === "create" ? "created" : "updated"} successfully!`
-            );
+            toast.success(`Student ${action === "create" ? "created" : "updated"} successfully!`);
             router.push("/list/students");
             form.reset();
             queryClient.invalidateQueries({ queryKey: ["students"] });
@@ -272,10 +239,19 @@ const ManageStudent = () => {
         },
     });
 
-    // Usage
+
     const onSubmit = (data: FormData) => {
         studentMutation.mutate(data);
     };
+
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const startYear = getYear(new Date()) - 100;
+    const endYear = getYear(new Date()) + 100;
+    const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
 
     return (
         <div className="p-4">
@@ -515,7 +491,7 @@ const ManageStudent = () => {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {isLoading && (
+                                                {isParentsLoading && (
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin flex justify-center" />
                                                 )}
                                                 {parents?.map((parent: Parent) => (
@@ -606,6 +582,9 @@ const ManageStudent = () => {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
+                                                {isClassesLoading && (
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin flex justify-center" />
+                                                )}
                                                 {classes?.map((cls: Class) => (
                                                     <SelectItem key={cls.id} value={cls.id.toString()}>
                                                         {cls.name}

@@ -1,16 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export async function GET(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
-) {
-    const { id } = await params;
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const { id } = params;
 
     try {
-        console.log(id);
-        const lessonData = await prisma.lesson.findUnique({
-            where: { id: Number(id) },
+        const lesson = await prisma.lesson.findUnique({
+            where: { id },
             include: {
                 subject: true,
                 teacher: true,
@@ -18,16 +14,13 @@ export async function GET(
             },
         });
 
-        if (!lessonData) {
+        if (!lesson) {
             return NextResponse.json({ message: "Lesson not found" }, { status: 404 });
         }
 
-        return NextResponse.json({ data: lessonData }, { status: 200 });
+        return NextResponse.json(lesson, { status: 200 });
     } catch (error) {
-        console.error("Error fetching lesson:", error);
-        return NextResponse.json(
-            { message: "Internal Server Error" },
-            { status: 500 }
-        );
+        console.error(error);
+        return NextResponse.json({ message: "Failed to fetch lesson", error }, { status: 500 });
     }
 }

@@ -43,7 +43,7 @@ const StudentList = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={eventsData}
+          data={events}
           filterableColumns={["title", "class", "date", "startTime", "endTime"]}
         />)}
     </div>
