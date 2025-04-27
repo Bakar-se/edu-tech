@@ -7,10 +7,8 @@ export async function GET() {
     const classes = await prisma.class.findMany({
       include: {
         supervisor: true,
-        grade: true,
       },
     });
-
     return NextResponse.json({ data: classes }, { status: 200 });
   } catch (error) {
     console.error("Error fetching classes:", error);

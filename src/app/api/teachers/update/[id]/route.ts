@@ -10,7 +10,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-
+    console.log(id);
     if (!id) {
       return NextResponse.json(
         { success: false, message: "Teacher ID is required" },
@@ -38,8 +38,8 @@ export async function PUT(
         { status: 404 }
       );
     }
-
-    const clerkUserId = existingTeacher.id;
+    console.log(id);
+    const clerkUserId = id;
 
     // Unique email check (excluding current teacher)
     const existingEmail = await prisma.teacher.findFirst({

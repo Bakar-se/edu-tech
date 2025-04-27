@@ -16,7 +16,6 @@ export type Class = {
   id: number;
   name: string;
   capacity: number;
-  grade: number;
   supervisor: {
     name: string;
     surname: string;
@@ -27,7 +26,6 @@ export type Class = {
 export const useClassColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
-  console.log(role);
   const queryClient = useQueryClient();
 
   // delete classes api
@@ -88,50 +86,49 @@ export const useClassColumns = () => {
       ),
     },
     {
-      accessorKey: "grade",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Grade" />
-      ),
-    },
-    {
       accessorKey: "supervisor",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Supervisor" />
       ),
-      cell: ({ row }: { row: Row<Class> }) => (
-        <div>{`${row.original.supervisor.name} ${row.original.supervisor.surname}`}</div>
-      ),
+      cell: ({ row }: { row: Row<Class> }) => {
+        const supervisor = row.original.supervisor;
+        return supervisor ? (
+          <div>{`${supervisor.name} ${supervisor.surname}`}</div>
+        ) : (
+          <div className="text-muted-foreground italic">No Supervisor</div>
+        );
+      },
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Class> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link
-                href={`/list/classes/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Class> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link
+                  href={`/list/classes/manage?action=edit&id=${row.original.id}`}
+                >
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Edit />
                   </Button>
-                }
-                title="Delete Class"
-                description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Class"
+                  description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

@@ -49,7 +49,6 @@ const Schema = z.object({
     (val) => Number(val),
     z.number().min(1, { message: "Capacity must be at least 1" })
   ),
-  gradeId: z.number().nullable(),
   supervisorId: z.string(),
 });
 type FormData = z.infer<typeof Schema>;
@@ -100,7 +99,6 @@ const ManageClass = () => {
             name: classData.name || "",
             capacity: classData.capacity || 0,
             supervisorId: classData.supervisorId || "",
-            gradeId: classData.gradeId !== null ? classData.gradeId : 0,
           });
         } catch (error) {
           console.error("Error fetching teacher:", error);
@@ -124,7 +122,6 @@ const ManageClass = () => {
       name: "",
       capacity: 0,
       supervisorId: "",
-      gradeId: null,
     },
   });
 
@@ -168,7 +165,7 @@ const ManageClass = () => {
   return (
     <div className="p-4">
       <h1 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-        {action === "create" ? "Create Teacher" : "Edit Teacher"}
+        {action === "create" ? "Create Class" : "Edit Class"}
       </h1>
 
       <Form {...form}>
@@ -207,45 +204,6 @@ const ManageClass = () => {
                     />
                     <FormMessage>
                       {form.formState.errors.capacity?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <FormField
-                control={form.control}
-                name="gradeId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Grade</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Grade" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {[
-                          "1",
-                          "2",
-                          "3",
-                          "4",
-                          "5",
-                          "6-",
-
-                        ].map((type, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage>
-                      {form.formState.errors.gradeId?.message}
                     </FormMessage>
                   </FormItem>
                 )}

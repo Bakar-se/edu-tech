@@ -17,6 +17,7 @@ export type Teacher = {
   id: string;
   teacherId: string;
   name: string;
+  surname: string;
   email: string;
   subjects: string[];
   classes: string[];
@@ -77,15 +78,15 @@ export const useTeacherColumns = () => {
       enableHiding: false,
     },
     {
-      accessorKey: "id",
+      accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Info" />
+        <DataTableColumnHeader column={column} title="First name" />
       ),
     },
     {
-      accessorKey: "name",
+      accessorKey: "surname",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
+        <DataTableColumnHeader column={column} title="Last name" />
       ),
     },
     {
@@ -118,39 +119,39 @@ export const useTeacherColumns = () => {
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Teacher> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/teachers/profile/${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link
-                href={`/list/teachers/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Teacher> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/teachers/profile?id=${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Teacher"
-                description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/teachers/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Teacher"
+                  description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

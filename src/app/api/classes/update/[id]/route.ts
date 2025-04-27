@@ -17,7 +17,6 @@ export async function PUT(
         name,
         capacity: Number(capacity),
         supervisorId: supervisorId || null,
-        gradeId: gradeId || null,
       },
     });
 
