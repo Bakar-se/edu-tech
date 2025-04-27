@@ -57,8 +57,6 @@ model Teacher {
   subjects  Subject[] 
   lessons   Lesson[]
   classes   Class[]
-
-  Subject Subject[] @relation("SubjectTeachers")
 }
 
 model Parent {
@@ -84,9 +82,9 @@ model Parent {
 
 model Grade {
   id       Int       @id @default(autoincrement())
-  level    Int       @unique
+  grade    String
+  level    Float       @unique
   students Student[]
-  classes  Class[]
 }
 
 model Class {
@@ -95,8 +93,6 @@ model Class {
   capacity      Int
   supervisorId  String?
   supervisor    Teacher?      @relation(fields: [supervisorId], references: [id])
-  gradeId       Int?
-  grade         Grade?         @relation(fields: [gradeId], references: [id])
   students      Student[]
   lessons       Lesson[]
   events        Event[]
@@ -108,13 +104,10 @@ model Subject {
   name     String    @unique
   teachers Teacher[]
   lessons  Lesson[]
-
-  Teacher Teacher[] @relation("SubjectTeachers")
 }
 
 model Lesson {
   id        String   @id @default(uuid())
-  name      String
   startTime DateTime
   endTime   DateTime
   day       String?

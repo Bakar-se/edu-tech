@@ -18,38 +18,14 @@ const LessonList = () => {
     return response.data.data;
   };
 
-  // Fetch teachers
-  const fetchTeachers = async () => {
-    const response = await axios.get("/api/teachers/getallteachers");
-    return response.data.data;
-  };
-
-  // Fetch subjects
-  const fetchSubjects = async () => {
-    const response = await axios.get("/api/subjects/getallsubjects");
-    return response.data.data;
-  };
-
   const {
     data: lessons,
     isLoading: loadingLessons,
     isError: errorLessons,
   } = useQuery({ queryKey: ["lessons"], queryFn: fetchLessons });
 
-  const {
-    data: teachers,
-    isLoading: loadingTeachers,
-    isError: errorTeachers,
-  } = useQuery({ queryKey: ["teachers"], queryFn: fetchTeachers });
-
-  const {
-    data: subjects,
-    isLoading: loadingSubjects,
-    isError: errorSubjects,
-  } = useQuery({ queryKey: ["subjects"], queryFn: fetchSubjects });
-
-  const isLoading = loadingLessons || loadingTeachers || loadingSubjects;
-  const isError = errorLessons || errorTeachers || errorSubjects;
+  const isLoading = loadingLessons;
+  const isError = errorLessons;
 
   return (
     <div className="container mx-auto px-4 py-10">

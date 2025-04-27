@@ -4,217 +4,284 @@ import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-    Form,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormControl,
-    FormMessage,
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
 } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronsUpDown, XCircle } from "lucide-react";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+} from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils"; // assuming you have a cn utility
 import { Teacher } from "../../teachers/columns";
+import { Badge } from "@/components/ui/badge";
 
 const subjectSchema = z.object({
-    name: z.string().min(3, "Subject name is required"), // Subject name validation
-    teacherId: z.string().min(1, "Teacher ID is required"), // Teacher ID validation
+  name: z.string().min(3, "Subject name is required"),
+  teacherIds: z.array(z.string().min(1, "Teacher ID is required")),
 });
-
-
 
 type SubjectSchema = z.infer<typeof subjectSchema>;
 
 const ManageSubject = () => {
-    const router = useRouter();
-    const [action, setAction] = useState<string>("create");
-    const search = useSearchParams();
-    const path = search.get("action");
-    const id = search.get("id");
+  const router = useRouter();
+  const search = useSearchParams();
+  const path = search.get("action");
+  const id = search.get("id");
 
-    const queryClient = useQueryClient();
+  const [action, setAction] = useState<string>("create");
 
-    const [teachers, setTeachers] = useState<
-        { id: string; name: string; surname: string }[] | null
-    >(null); // Initialize as null to handle undefined gracefully
+  const queryClient = useQueryClient();
+  const form = useForm<SubjectSchema>({
+    resolver: zodResolver(subjectSchema),
+    defaultValues: {
+      name: "",
+      teacherIds: [],
+    },
+  });
 
-    const [initialData, setInitialData] = useState<any>(null);
+  const fetchTeachers = async () => {
+    const response = await axios.get("/api/teachers/getallteachers");
+    return response.data.data;
+  };
 
-    const form = useForm<SubjectSchema>({
-        resolver: zodResolver(subjectSchema),
-        defaultValues: {
-            name: "",
-            teacherId: "",
+  const {
+    data: teachers = [],
+    isLoading: isTeachersLoading,
+    isError: isTeachersError,
+  } = useQuery({
+    queryKey: ["teachers"],
+    queryFn: fetchTeachers,
+  });
+
+  useEffect(() => {
+    setAction(path || "create");
+    const fetchSubject = async () => {
+      if (action === "edit" && id) {
+        try {
+          const response = await axios.get(`/api/subjects/getsubject/${id}`);
+          const subject = response.data.data;
+          form.setValue("name", subject.name || "");
+          form.setValue(
+            "teacherIds",
+            subject.teachers?.map((t: Teacher) => t.id) || []
+          );
+        } catch (error) {
+          console.error("Error fetching subject:", error);
         }
-    });
-
-    // Fetch teachers list
-    useEffect(() => {
-        const fetchTeachers = async () => {
-            try {
-                const response = await axios.get('/api/teachers');
-                console.log('API response:', response.data); // Log the API response
-                // Ensure the response is an array before setting it
-                if (Array.isArray(response.data)) {
-                    setTeachers(response.data);
-                } else {
-                    console.error('Response is not an array', response.data);
-                    setTeachers([]); // Set an empty array if response is not an array
-                }
-            } catch (error) {
-                console.error("Error fetching teachers:", error);
-                setTeachers([]); // Set empty array in case of error
-            }
-        };
-
-        fetchTeachers(); // Call the function inside useEffect
-    }, []);
-
-
-
-    // Fetch subject if editing
-    useEffect(() => {
-        if (path === "edit" && id) {
-            setAction("edit");
-            const fetchSubject = async () => {
-                try {
-                    const response = await axios.get(`/api/subjects/getsubject/${id}`);
-                    const subject = response.data.data;
-                    setInitialData(subject);
-                    form.reset({
-                        name: subject.name,
-                        teacherId: subject.teachers?.[0]?.id || "", // get first teacher's ID
-                    });
-
-                } catch (error) {
-                    console.error("Failed to fetch subject data", error);
-                }
-            };
-            fetchSubject();
-        }
-    }, [path, id, form]);
-
-    const subjectMutation = useMutation({
-        mutationFn: async (data: SubjectSchema) => {
-            if (action === "create") {
-                return await axios.post("/api/subjects/create", data);
-            } else if (action === "edit" && id) {
-                return await axios.put(`/api/subjects/update/${id}`, data);
-            } else {
-                throw new Error("Invalid action");
-            }
-        },
-        onSuccess: () => {
-            toast.success(
-                `Subject ${action === "create" ? "created" : "updated"} successfully!`
-            );
-            router.push("/list/subjects");
-            form.reset();
-            queryClient.invalidateQueries({ queryKey: ["subjects"] });
-        },
-        onError: (error: any) => {
-            const message =
-                error?.response?.data?.message ||
-                error?.response?.data?.error ||
-                error?.message ||
-                "An unexpected error occurred";
-            toast.error(message);
-        },
-    });
-
-    const onSubmit = (data: SubjectSchema) => {
-        subjectMutation.mutate(data);
+      }
     };
 
-    return (
-        <div className="p-6">
-            <h1 className="text-2xl font-semibold">
-                {action === "create" ? "Create Subject" : "Edit Subject"}
-            </h1>
+    fetchSubject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, id]);
 
-            <Form {...form}>
-                <form className="mt-6 space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                    {/* Name */}
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Enter subject name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+  const subjectMutation = useMutation({
+    mutationFn: async (data: SubjectSchema) => {
+      if (action === "create") {
+        return await axios.post("/api/subjects/create", data);
+      } else if (action === "edit" && id) {
+        return await axios.put(`/api/subjects/update/${id}`, data);
+      } else {
+        throw new Error("Invalid action");
+      }
+    },
+    onSuccess: () => {
+      toast.success(
+        `Subject ${action === "create" ? "created" : "updated"} successfully!`
+      );
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
+      router.push("/list/subjects");
+      form.reset();
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "An unexpected error occurred";
+      toast.error(message);
+    },
+  });
 
-                    {/* Teachers Multi-Select */}
-                    <FormField
-                        control={form.control}
-                        name="teacherId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Teacher</FormLabel>
+  const onSubmit = (data: SubjectSchema) => {
+    subjectMutation.mutate(data);
+  };
 
-                                {Array.isArray(teachers) && teachers.length > 0 ? (
-                                    // ✅ Dropdown if parents are available
-                                    <select
-                                        {...field}
-                                        className="border rounded p-2 w-full"
-                                        required
-                                    >
-                                        <option value="">Select a teacher</option>
-                                        {teachers.map((teacher: any) => (
-                                            <option key={teacher.id} value={teacher.id}>
-                                                {parent.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                ) : (
-                                    // ✅ Text input fallback if no teacher
-                                    <input
-                                        {...field}
-                                        type="text"
-                                        className="border rounded p-2 w-full"
-                                        placeholder="Enter Teacher ID"
-                                        required
-                                    />
-                                )}
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-6">
+        {action === "create" ? "Create Subject" : "Edit Subject"}
+      </h1>
 
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Subject Name */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subject Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter subject name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          {/* Multi-select Teachers */}
+          <FormField
+            control={form.control}
+            name="teacherIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Teachers</FormLabel>
+                <FormControl>
+                  {isTeachersLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="animate-spin w-4 h-4" />
+                      <span>Loading teachers...</span>
+                    </div>
+                  ) : isTeachersError ? (
+                    <div className="text-red-500">Failed to load teachers.</div>
+                  ) : (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value.length && "text-muted-foreground"
+                          )}
+                        >
+                          {/* Show selected teachers as chips */}
+                          {field.value.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {teachers
+                                .filter((teacher: any) =>
+                                  field.value.includes(teacher.id)
+                                )
+                                .map((teacher: any) => (
+                                  <Badge
+                                    key={teacher.id}
+                                    className="flex items-center gap-2 px-2 py-1 rounded-md"
+                                  >
+                                    {teacher.name} {teacher.surname}
+                                  </Badge>
+                                ))}
+                            </div>
+                          ) : (
+                            "Select teachers"
+                          )}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search teacher..." />
+                          <CommandList>
+                            {teachers.map((teacher: Teacher) => (
+                              <CommandItem
+                                key={teacher.id}
+                                onSelect={() => {
+                                  const isSelected = field.value.includes(
+                                    teacher.id
+                                  );
+                                  if (isSelected) {
+                                    field.onChange(
+                                      field.value.filter(
+                                        (id) => id !== teacher.id
+                                      )
+                                    );
+                                  } else {
+                                    field.onChange([
+                                      ...field.value,
+                                      teacher.id,
+                                    ]);
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    checked={field.value.includes(teacher.id)}
+                                    onCheckedChange={() => {
+                                      const isSelected = field.value.includes(
+                                        teacher.id
+                                      );
+                                      if (isSelected) {
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) => id !== teacher.id
+                                          )
+                                        );
+                                      } else {
+                                        field.onChange([
+                                          ...field.value,
+                                          teacher.id,
+                                        ]);
+                                      }
+                                    }}
+                                  />
+                                  {teacher.name} {teacher.surname}
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-
-                    <Button
-                        type="submit"
-                        className="mt-4"
-                        disabled={form.formState.isSubmitting}
-                    >
-                        {form.formState.isSubmitting ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {action === "create" ? "Creating..." : "Updating..."}
-                            </>
-                        ) : action === "create" ? (
-                            "Create"
-                        ) : (
-                            "Update"
-                        )}
-                    </Button>
-                </form>
-            </Form>
-        </div>
-    );
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="mt-4"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {action === "create" ? "Creating..." : "Updating..."}
+              </>
+            ) : action === "create" ? (
+              "Create"
+            ) : (
+              "Update"
+            )}
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
 };
-
 
 export default ManageSubject;

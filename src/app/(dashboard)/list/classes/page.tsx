@@ -27,8 +27,6 @@ const StudentList = () => {
     queryFn: fetchTeachers,
   });
 
-  console.log(classes);
-
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
@@ -46,7 +44,7 @@ const StudentList = () => {
         <DataTable
           columns={columns}
           data={classes}
-          filterableColumns={["name", "capacity", "grade", "supervisor"]}
+          filterableColumns={["name", "capacity", "supervisor"]}
         />
       )}
     </div>

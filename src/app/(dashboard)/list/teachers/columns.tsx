@@ -17,6 +17,7 @@ export type Teacher = {
   id: string;
   teacherId: string;
   name: string;
+  surname: string;
   email: string;
   subjects: string[];
   classes: string[];
