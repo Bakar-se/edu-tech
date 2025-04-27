@@ -21,7 +21,7 @@ export async function POST(req: Request) {
                 title,
                 startDate: new Date(startDate),
                 dueDate: new Date(dueDate),
-                lessonId,
+                subjectId,
             },
         });
 

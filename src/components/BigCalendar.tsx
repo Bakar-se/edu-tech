@@ -9,7 +9,7 @@ import { CustomToolbar } from "./CustomToolbar";
 
 const localizer = momentLocalizer(moment);
 
-const BigCalendar = () => {
+const BigCalendar = ({ events }: any) => {
   const [view, setView] = useState<View>(Views.WORK_WEEK);
 
   const handleOnChangeView = (selectedView: View) => {
@@ -19,12 +19,12 @@ const BigCalendar = () => {
   return (
     <Calendar
       localizer={localizer}
-      events={calendarEvents}
+      events={events}
       startAccessor="start"
       endAccessor="end"
       views={["work_week", "day"]}
       view={view}
-      style={{ height: "98%" }}
+      style={{ height: "100%" }}
       onView={handleOnChangeView}
       min={new Date(2021, 0, 1, 8, 0)}
       max={new Date(2021, 0, 1, 18, 0)}

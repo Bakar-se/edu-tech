@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-interface Lesson {
+interface Subject {
   id: string;
   name: string;
 }
@@ -43,7 +43,7 @@ const Schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   startDate: z.date(),
   dueDate: z.date(),
-  lessonId: z.string().min(1, { message: "Lesson ID is required" }),
+  subjectId: z.string().min(1, { message: "Lesson ID is required" }),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -54,9 +54,9 @@ const ManageAssignment = () => {
   const action = search.get("action") || "create";
   const id = search.get("id");
 
-  const fetchLessons = async () => {
-    const response = await axios.get("/api/lessons/getalllessons");
-    return response.data.data;
+  const fetchSubjects = async () => {
+    const response = await axios.get("/api/subjects/getallsubjects");
+    return response.data;
   };
 
   const queryClient = useQueryClient();
@@ -67,13 +67,13 @@ const ManageAssignment = () => {
       title: "",
       startDate: new Date(),
       dueDate: new Date(),
-      lessonId: "",
+      subjectId: "",
     },
   });
 
-  const { data: lessons, isLoading: lessonsLoading } = useQuery({
-    queryKey: ["lessons"],
-    queryFn: fetchLessons,
+  const { data: subjects, isLoading: subjectsLoading } = useQuery({
+    queryKey: ["subjects"],
+    queryFn: fetchSubjects,
   });
 
   const assignmentMutation = useMutation({
@@ -130,7 +130,7 @@ const ManageAssignment = () => {
           title: data.title,
           startDate: new Date(data.startDate),
           dueDate: new Date(data.dueDate),
-          lessonId: data.lessonId,
+          subjectId: data.subjectId,
         });
       };
       fetchAssignment();
@@ -223,23 +223,23 @@ const ManageAssignment = () => {
 
           <FormField
             control={form.control}
-            name="lessonId"
+            name="subjectId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Lesson</FormLabel>
+                <FormLabel>Subject</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a lesson" />
+                      <SelectValue placeholder="Select a subject" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {lessonsLoading && (
+                    {subjectsLoading && (
                       <Loader2 className="animate-spin mx-auto" />
                     )}
-                    {lessons?.map((lesson: Lesson) => (
-                      <SelectItem key={lesson.id} value={lesson.id}>
-                        {lesson.name}
+                    {subjects?.map((subject: Subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

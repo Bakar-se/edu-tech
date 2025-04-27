@@ -104,6 +104,9 @@ model Subject {
   name     String    @unique
   teachers Teacher[]
   lessons  Lesson[]
+
+
+  Assignment Assignment[]
 }
 
 model Lesson {
@@ -147,6 +150,8 @@ model Assignment {
   lesson   Lesson  @relation(fields: [lessonId], references: [id])
 
   results   Result[]
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
 }
 
 model Result {

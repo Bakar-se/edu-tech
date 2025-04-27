@@ -13,7 +13,7 @@ const AssignmentList = () => {
   const router = useRouter();
   const columns = useAssignmentColumns();
 
-  const fetchLessons = async () => {
+  const fetchSubjects = async () => {
     const response = await axios.get("/api/assignments/getallassignments");
     return response.data;
     return response.data;
@@ -25,7 +25,7 @@ const AssignmentList = () => {
     isError,
   } = useQuery({
     queryKey: ["assignments"],
-    queryFn: fetchLessons,
+    queryFn: fetchSubjects,
   });
 
   return (

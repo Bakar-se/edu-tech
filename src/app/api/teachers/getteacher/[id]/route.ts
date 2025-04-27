@@ -20,7 +20,12 @@ export async function GET(
       include: {
         subjects: true,
         classes: true,
-        lessons: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+          },
+        },
       },
     });
 
