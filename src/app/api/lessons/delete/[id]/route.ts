@@ -1,16 +1,13 @@
 import prisma from "@/lib/prisma";
-import { z } from "zod";
 import { NextResponse } from "next/server";
 
-export async function DELETE(req: Request) {
+interface Params {
+    id: string;
+}
+
+export async function DELETE(req: Request, { params }: { params: Params }) {
     try {
-        const body = await req.json();
-
-        const DeleteLessonSchema = z.object({
-            id: z.string().uuid(), // Lesson id must be a UUID
-        });
-
-        const { id } = DeleteLessonSchema.parse(body);
+        const { id } = params;
 
         const deletedLesson = await prisma.lesson.delete({
             where: { id },

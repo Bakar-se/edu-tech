@@ -324,6 +324,7 @@ const ManageParent = () => {
                                         <Input
                                             type="email"
                                             placeholder="Type here"
+                                            disabled={action === "edit"}
                                             {...form.register("email")}
                                         />
                                         <FormMessage>

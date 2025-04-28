@@ -116,7 +116,7 @@ export const useStudentColumns = () => {
           header: () => <div className="text-center">Action</div>,
           cell: ({ row }: { row: Row<Student> }) => (
             <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/students/profile/${row.original.id}`}>
+              <Link href={`/list/students/profile?id=${row.original.id}`}>
                 <Button variant="ghost" size="icon">
                   <Eye />
                 </Button>

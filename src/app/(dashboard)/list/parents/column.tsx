@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Eye, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -134,6 +134,11 @@ export const useParentColumns = () => {
           header: () => <div className="text-center">Action</div>,
           cell: ({ row }: { row: Row<Parent> }) => (
             <div className="flex items-center justify-center space-x-2">
+              <Link href={`/list/parents/profile?id=${row.original.id}`}>
+                <Button variant="ghost" size="icon">
+                  <Eye />
+                </Button>
+              </Link>
               <Link
                 href={`/list/parents/manage?action=edit&id=${row.original.id}`}
               >

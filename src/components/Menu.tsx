@@ -120,7 +120,7 @@ export const menuItems = [
       {
         icon: <CircleUserRound />,
         label: "Profile",
-        href: "/list/studnets/profile?id=",
+        href: "/list/students/profile?id=",
         visible: ["student"],
       },
       {
