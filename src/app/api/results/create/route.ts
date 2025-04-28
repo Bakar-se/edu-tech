@@ -4,24 +4,25 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { studentId, examName, assignmentName, score } = body;
+        const { studentId, examId, grade } = body;
 
-        // Basic validation
-        if (!studentId || !examName || !score) {
+        // Validate required fields
+        if (!studentId || !examId || !grade) {
             return NextResponse.json(
-                { message: "Missing required fields: studentId, examName, or score" },
+                { message: "Missing required fields: studentId, examId, and grade" },
                 { status: 400 }
             );
         }
 
-        // Create the result in the database
+        // Create result in database
         const newResult = await prisma.result.create({
             data: {
-                studentId: studentId,
-                examId: examName,
-                score: Number(score),
+                studentId,
+                grade,
+                examId: examId ? parseInt(examId) : null,
             },
         });
+        console.log(newResult);
 
         return NextResponse.json(newResult, { status: 201 });
     } catch (error) {

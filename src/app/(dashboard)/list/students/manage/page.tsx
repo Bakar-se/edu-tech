@@ -35,7 +35,6 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { Class } from "../../classes/column";
-import { Parent } from "../../parents/column";
 
 const Schema = z.object({
     username: z
@@ -85,9 +84,14 @@ type FormData = z.infer<typeof Schema>;
 
 const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
+interface Parent {
+    id: string;
+    name: string;
+    surname: string;
+}
 const ManageStudent = () => {
     const router = useRouter();
-
+    const [action, setAction] = React.useState<string>("create");
     const search = useSearchParams();
     const path = search.get("action");
     const id = search.get("id");
@@ -96,25 +100,6 @@ const ManageStudent = () => {
     const queryClient = useQueryClient();
 
     const [date, setDate] = React.useState<Date>(new Date());
-    const [action, setAction] = React.useState<string>(path || "create");
-
-    const form = useForm<FormData>({
-        resolver: zodResolver(Schema),
-        defaultValues: {
-            username: "",
-            email: "",
-            password: "",
-            firstname: "",
-            lastname: "",
-            phone: "",
-            address: "",
-            birthday: undefined,
-            sex: undefined,
-            bloodType: undefined,
-            parentId: "",
-            classId: null,
-        },
-    });
 
     // Fetch parents
     const fetchParents = async () => {
@@ -160,20 +145,22 @@ const ManageStudent = () => {
 
                     form.reset({
                         username: studentData.username || "",
-                        firstname: studentData.name || "",
-                        lastname: studentData.surname || "",
                         email: studentData.email || "",
+                        password: studentData.password || "",
+                        firstname: studentData.firstname || "",
+                        lastname: studentData.lastname || "",
                         phone: studentData.phone || "",
                         address: studentData.address || "",
-                        bloodType: studentData.bloodType || "",
-                        password: studentData.password || "",
+                        birthday: studentData.birthday ? new Date(studentData.birthday) : undefined,
                         sex: studentData.sex || undefined,
-                        birthday: birthday,
+                        bloodType: studentData.bloodType || undefined,
                         parentId: studentData.parentId || "",
-                        classId: studentData.classId || "",
+                        classId: studentData.classId ?? null,
                     });
 
                     setDate(birthday || new Date());
+                    form.setValue("sex", studentData.sex); // Set the gender value
+                    form.setValue("bloodType", studentData.bloodType);
                 }
                 catch (error) {
                     console.error("Error fetching student:", error);
@@ -182,7 +169,8 @@ const ManageStudent = () => {
         };
 
         fetchStudent();
-    }, [action, id, form]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [action, id]);
 
     useEffect(() => {
         if (path) {
@@ -190,7 +178,23 @@ const ManageStudent = () => {
         }
     }, [path]);
 
-
+    const form = useForm<FormData>({
+        resolver: zodResolver(Schema),
+        defaultValues: {
+            username: "",
+            email: "",
+            password: "",
+            firstname: "",
+            lastname: "",
+            phone: "",
+            address: "",
+            birthday: undefined,
+            sex: undefined,
+            bloodType: undefined,
+            parentId: "",
+            classId: null,
+        },
+    });
 
     const handleMonthChange = (month: string) => {
         const newDate = setMonth(date, months.indexOf(month));
@@ -217,9 +221,9 @@ const ManageStudent = () => {
             };
 
             if (action === "create") {
-                return await axios.post("/api/students/create", payload);
+                return await axios.post("/api/students/create", data);
             } else if (action === "edit" && id) {
-                return await axios.put(`/api/students/update/${id}`, payload);
+                return await axios.put(`/api/students/update/${id}`, data);
             } else {
                 throw new Error("Invalid action");
             }
@@ -344,7 +348,7 @@ const ManageStudent = () => {
                                         <Input
                                             type="email"
                                             placeholder="Type here"
-                                            disabled={action === "edit"}
+
                                             {...form.register("email")}
                                         />
                                         <FormMessage>
@@ -509,7 +513,7 @@ const ManageStudent = () => {
                                                 )}
                                                 {parents?.map((parent: Parent) => (
                                                     <SelectItem key={parent.id} value={parent.id}>
-                                                        {parent.name}
+                                                        {`${parent.name} ${parent.surname}`}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

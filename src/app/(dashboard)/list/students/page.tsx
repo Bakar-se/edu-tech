@@ -38,11 +38,10 @@ const StudentList = () => {
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />
       ) : (
-        <DataTable columns={columns} data={students} filterableColumns={["studentId",
+        <DataTable columns={columns} data={students} filterableColumns={[
           "email",
           "name",
-          "grade",
-          "class",
+          "classes",
           "phone"]} />)}
     </div>
   )

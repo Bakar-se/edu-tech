@@ -19,7 +19,6 @@ export async function GET(
             where: { id },
             include: {
                 class: true, // Optional: Include class data
-                grade: true, // Optional: Include grade data
                 parent: true, // Optional: Include parent data if required
             },
         });

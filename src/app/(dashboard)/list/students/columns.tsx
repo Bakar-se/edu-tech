@@ -17,10 +17,10 @@ export type Student = {
   id: string;
   studentId: string;
   name: string;
+  surname: string;
   email: string;
   phone: string;
-  grade: number;
-  class: string;
+  classes: string[];
   address: string;
 };
 
@@ -77,14 +77,17 @@ export const useStudentColumns = () => {
       enableSorting: false,
       enableHiding: false,
     },
-    {
-      accessorKey: "studentId",
-      header: "Student ID",
-    },
+
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
+        <DataTableColumnHeader column={column} title="First Name" />
+      ),
+    },
+    {
+      accessorKey: "surname",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Last name" />
       ),
     },
     {
@@ -94,16 +97,16 @@ export const useStudentColumns = () => {
       ),
     },
     {
+      accessorKey: "classes",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Classes" />
+      ),
+    },
+    {
       accessorKey: "phone",
-      header: "Phone",
-    },
-    {
-      accessorKey: "grade",
-      header: "Grade",
-    },
-    {
-      accessorKey: "class",
-      header: "Class",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Phone" />
+      ),
     },
     {
       accessorKey: "address",

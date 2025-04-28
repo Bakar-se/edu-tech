@@ -1,31 +1,19 @@
-import prisma from "@/lib/prisma"; // or wherever your prisma client is
+// /api/classes/getall/route.ts
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
     try {
         const results = await prisma.result.findMany({
-            select: {
-                id: true,
-                score: true,
-                student: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                exam: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
-                },
+            include: {
+                student: true,
             },
         });
-
         return NextResponse.json({ data: results }, { status: 200 });
-    } catch (error: any) {
+    } catch (error) {
+        console.error("Error fetching results:", error);
         return NextResponse.json(
-            { message: "Failed to fetch results", error: error.message },
+            { message: "Internal Server Error" },
             { status: 500 }
         );
     }

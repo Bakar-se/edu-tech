@@ -79,7 +79,7 @@ const ManageClass = () => {
   const [date, setDate] = React.useState<Date>(new Date());
 
   useEffect(() => {
-    const fetchTeacher = async () => {
+    const fetchClass = async () => {
       if (action === "edit" && id) {
         try {
           // get single teacher api
@@ -104,7 +104,7 @@ const ManageClass = () => {
       }
     };
 
-    fetchTeacher();
+    fetchClass();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, id]);
 

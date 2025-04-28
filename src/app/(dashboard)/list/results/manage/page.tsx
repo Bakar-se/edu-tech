@@ -1,95 +1,90 @@
 "use client";
+
 import React, { useEffect } from "react";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    Form,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage,
+} from "@/components/ui/form";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface Student {
     id: string;
     name: string;
+    surname: string;
+
 }
 
 interface Exam {
-    [x: string]: any;
     id: number;
     title: string;
 }
 
-interface Assignment {
-    id: number;
-    name: string;
-}
-
-const Schema = z.object({
-    score: z.number().min(0, { message: "Score must be at least 0" }),
+const formSchema = z.object({
+    grade: z.string().min(1, { message: "Grade is required" }),
     studentId: z.string().min(1, { message: "Student is required" }),
-    examId: z.number().nullable(),
-    assignmentId: z.number().nullable(),
+    examId: z.string().nullable(), // keep string because Select returns string
 });
 
-type FormData = z.infer<typeof Schema>;
+type FormData = z.infer<typeof formSchema>;
 
 const ResultForm = () => {
     const router = useRouter();
-    const [action, setAction] = React.useState<string>("create");
     const search = useSearchParams();
-    const path = search.get("action");
+    const queryClient = useQueryClient();
+    const [action, setAction] = React.useState<"create" | "edit">("create");
+
     const id = search.get("id");
+    const pathAction = search.get("action");
 
-    const fetchStudents = async () => {
-        const response = await axios.get("/api/students/getallstudents");
-        return response.data.data;
-    };
-
-    const fetchExams = async () => {
-        const response = await axios.get("/api/exams/getallexams");
-        return response.data.data;
-    };
-
-    const fetchAssignments = async () => {
-        const response = await axios.get("/api/assignments/getallassignments");
-        return response.data.data;
-    };
+    useEffect(() => {
+        if (pathAction === "edit") {
+            setAction("edit");
+        }
+    }, [pathAction]);
 
     const { data: students, isLoading: studentsLoading } = useQuery({
         queryKey: ["students"],
-        queryFn: fetchStudents,
+        queryFn: async () => {
+            const res = await axios.get("/api/students/getallstudents");
+            return res.data.data;
+        },
     });
 
     const { data: exams, isLoading: examsLoading } = useQuery({
         queryKey: ["exams"],
-        queryFn: fetchExams,
+        queryFn: async () => {
+            const res = await axios.get("/api/exams/getallexams");
+            return res.data;
+        },
     });
-
-    const { data: assignments, isLoading: assignmentsLoading } = useQuery({
-        queryKey: ["assignments"],
-        queryFn: fetchAssignments,
-    });
-
-    const queryClient = useQueryClient();
-
-    useEffect(() => {
-        if (path) {
-            setAction(path);
-        }
-    }, [path]);
 
     const form = useForm<FormData>({
-        resolver: zodResolver(Schema),
+        resolver: zodResolver(formSchema),
         defaultValues: {
-            score: 0,
+            grade: "",
             studentId: "",
             examId: null,
-            assignmentId: null,
         },
     });
 
@@ -97,17 +92,16 @@ const ResultForm = () => {
         mutationFn: async (data: FormData) => {
             if (action === "create") {
                 return await axios.post("/api/results/create", data);
-            } else if (action === "edit" && id) {
-                return await axios.put(`/api/results/update/${id}`, data);
-            } else {
-                throw new Error("Invalid action");
             }
+            if (action === "edit" && id) {
+                return await axios.put(`/api/results/update/${id}`, data);
+            }
+            throw new Error("Invalid action");
         },
         onSuccess: () => {
             toast.success(`Result ${action === "create" ? "created" : "updated"} successfully!`);
-            router.push("/list/results");
-            form.reset();
             queryClient.invalidateQueries({ queryKey: ["results"] });
+            router.push("/list/results");
         },
         onError: (error: any) => {
             const message =
@@ -130,99 +124,89 @@ const ResultForm = () => {
             </h1>
 
             <Form {...form}>
-                <form className="mt-4" onSubmit={form.handleSubmit(onSubmit)}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Score Field */}
-                        <div className="flex flex-col gap-2">
-                            <FormField
-                                control={form.control}
-                                name="score"
-                                render={() => (
-                                    <FormItem>
-                                        <FormLabel>Score</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                placeholder="Enter score"
-                                                {...form.register("score")}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Grade Field */}
+                    <FormField
+                        control={form.control}
+                        name="grade"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Grade</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Enter grade (e.g., A+, B, C-)"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        </div>
+                    {/* Student Field */}
+                    <FormField
+                        control={form.control}
+                        name="studentId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Student</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select student" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {studentsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        {students?.map((student: Student) => (
+                                            <SelectItem key={student.id} value={student.id}>
+                                                {`${student.name} ${student.surname}`}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        {/* Student Field */}
-                        <div className="flex flex-col gap-2">
-                            <FormField
-                                control={form.control}
-                                name="studentId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Student</FormLabel>
-                                        <Select
-                                            onValueChange={(value) => field.onChange(value)}
-                                            value={field.value}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select student" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {studentsLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                {students?.map((student: Student) => (
-                                                    <SelectItem key={student.id} value={student.id}>
-                                                        {`${student.name}`}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage>{form.formState.errors.studentId?.message}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                    {/* Exam Field (optional) */}
+                    <FormField
+                        control={form.control}
+                        name="examId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Exam</FormLabel>
+                                <Select
+                                    onValueChange={(value) => field.onChange(value || null)}
+                                    value={field.value ?? undefined}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select exam" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {examsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        {exams?.map((exam: Exam) => (
+                                            <SelectItem key={exam.id} value={exam.id.toString()}>
+                                                {exam.title}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        {/* Exam Field */}
-                        <div className="flex flex-col gap-2">
-                            <FormField
-                                control={form.control}
-                                name="examId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Exam</FormLabel>
-                                        <Select
-                                            onValueChange={(value) => field.onChange(value)}
-                                            value={field.value !== null ? field.value.toString() : undefined}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select exam" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {examsLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                {exams?.map((exam: Exam) => (
-                                                    <SelectItem key={exam.id} value={exam.id.toString()}>
-                                                        {exam.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage>{form.formState.errors.studentId?.message}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                    </div>
-
+                    {/* Submit Button */}
                     <Button
                         type="submit"
-                        className="mt-4"
+                        className="col-span-full mt-4"
                         disabled={form.formState.isSubmitting}
                     >
                         {form.formState.isSubmitting ? (

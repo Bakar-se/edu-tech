@@ -1,43 +1,23 @@
+// /api/classes/delete/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: number }> }
 ) {
-    const id = parseInt(params.id);
-
-    if (isNaN(id)) {
-        return NextResponse.json(
-            { success: false, message: "Event ID is required" },
-            { status: 400 }
-        );
-    }
-
     try {
-        const event = await prisma.event.findUnique({
-            where: { id },
+        const { id } = await params;
+
+        const deletedEvent = await prisma.event.delete({
+            where: { id: Number(id) },
         });
 
-        if (!event) {
-            return NextResponse.json(
-                { success: false, message: "Event not found" },
-                { status: 404 }
-            );
-        }
-
-        await prisma.event.delete({
-            where: { id },
-        });
-
+        return NextResponse.json({ data: deletedEvent }, { status: 200 });
+    } catch (error) {
+        console.error("Error deleting event:", error);
         return NextResponse.json(
-            { success: true, message: "Event deleted successfully" },
-            { status: 200 }
-        );
-    } catch (error: unknown) {
-        const err = error as Error;
-        return NextResponse.json(
-            { success: false, message: err.message || "Something went wrong" },
+            { message: "Internal Server Error" },
             { status: 500 }
         );
     }

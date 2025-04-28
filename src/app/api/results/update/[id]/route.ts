@@ -4,12 +4,12 @@ import { NextResponse } from "next/server";
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { id, studentId, examName, assignmentName, score } = body;
+        const { id, studentId, examId, grade } = body;
 
         // Basic validation for required fields
-        if (!id || !studentId || !examName || !score) {
+        if (!id || !studentId || !examId || !grade) {
             return NextResponse.json(
-                { message: "Missing required fields: id, studentId, examName, or score" },
+                { message: "Missing required fields: id, studentId, examId/assignmentId, or grade" },
                 { status: 400 }
             );
         }
@@ -21,9 +21,8 @@ export async function PUT(req: Request) {
             },
             data: {
                 studentId: studentId,
-                exam: examName,
-                assignment: assignmentName || null,  // Optional field
-                score: Number(score),  // Ensure score is a number
+                examId: examId ?? null, // If no examId, set to null
+                grade: grade,  // Keep grade as a string
             },
         });
 
@@ -31,7 +30,7 @@ export async function PUT(req: Request) {
     } catch (error) {
         console.error("Error updating result:", error);
         return NextResponse.json(
-            { message: "Internal Server Error" },
+
             { status: 500 }
         );
     }

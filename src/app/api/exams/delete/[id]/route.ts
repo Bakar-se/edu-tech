@@ -1,28 +1,19 @@
+// /api/classes/delete/[id]/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
 
-export async function DELETE(req: Request) {
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: number }> }
+) {
     try {
-        const body = await req.json();
-        const { examId } = body;
+        const { id } = await params;
 
-        if (!examId) {
-            return NextResponse.json(
-                { message: "Missing required field: examId" },
-                { status: 400 }
-            );
-        }
-
-        await prisma.exam.delete({
-            where: {
-                id: examId,
-            },
+        const deletedExam = await prisma.exam.delete({
+            where: { id: Number(id) },
         });
 
-        return NextResponse.json(
-            { message: "Exam deleted successfully" },
-            { status: 200 }
-        );
+        return NextResponse.json({ data: deletedExam }, { status: 200 });
     } catch (error) {
         console.error("Error deleting exam:", error);
         return NextResponse.json(

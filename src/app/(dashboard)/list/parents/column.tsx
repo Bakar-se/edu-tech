@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Edit, Eye, Trash } from "lucide-react";
+import { Badge, Edit, Eye, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,11 +15,17 @@ import Link from "next/link";
 
 export type Parent = {
   id: string;
+  parentId: string;
   name: string;
+  surname: string;
   email: string;
   phone: string;
   address: string;
-  students: string[]; // Array of student IDs
+  students: {
+    id: string;
+    name: string;
+    surname: string;
+  }[];
   occupation: string;
   emergencyContact: string;
   nationality: string;
@@ -82,7 +88,13 @@ export const useParentColumns = () => {
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
+        <DataTableColumnHeader column={column} title="First name" />
+      ),
+    },
+    {
+      accessorKey: "surname",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Last name" />
       ),
     },
     {
@@ -97,16 +109,17 @@ export const useParentColumns = () => {
         <DataTableColumnHeader column={column} title="Students" />
       ),
       cell: ({ row }) => {
-        const students = row.original.students;
+        const students = row.original.students || [];
         return (
-          <div>
-            {Array.isArray(students) && students.length > 0
-              ? students.join(", ")
-              : "No students"}
+          <div className="flex flex-wrap">
+            {students.map((student) => (
+              <Badge className="m-1" key={student.id}>
+                {student.name} {student.surname}
+              </Badge>
+            ))}
           </div>
         );
-      }
-
+      },
     },
     {
       accessorKey: "phone",
@@ -118,12 +131,6 @@ export const useParentColumns = () => {
       accessorKey: "address",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Address" />
-      ),
-    },
-    {
-      accessorKey: "emergencyContact",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Emergency Contact" />
       ),
     },
 

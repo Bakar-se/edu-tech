@@ -1,39 +1,23 @@
+// /api/classes/delete/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = params;
-
-    if (!id) {
-        return NextResponse.json(
-            { success: false, message: "Subject ID is required" },
-            { status: 400 }
-        );
-    }
-
     try {
-        const existingSubject = await prisma.subject.findUnique({ where: { id } });
+        const { id } = await params;
 
-        if (!existingSubject) {
-            return NextResponse.json(
-                { success: false, message: "Subject not found" },
-                { status: 404 }
-            );
-        }
-
-        await prisma.subject.delete({ where: { id } });
-
-        return NextResponse.json({
-            success: true,
-            message: "Subject deleted successfully",
+        const deletedExam = await prisma.exam.delete({
+            where: { id: Number(id) },
         });
-    } catch (error: any) {
-        console.error("[SUBJECT_DELETE_ERROR]", error);
+
+        return NextResponse.json({ data: deletedExam }, { status: 200 });
+    } catch (error) {
+        console.error("Error deleting exam:", error);
         return NextResponse.json(
-            { success: false, message: error?.message || "Failed to delete subject" },
+            { message: "Internal Server Error" },
             { status: 500 }
         );
     }

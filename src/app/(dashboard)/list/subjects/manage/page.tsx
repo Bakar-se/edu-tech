@@ -86,19 +86,10 @@ const ManageSubject = () => {
         try {
           const response = await axios.get(`/api/subjects/getsubject/${id}`);
           const subject = response.data.data;
-          form.setValue("name", subject.name || "");
-          form.setValue(
-            "teacherIds",
-            subject.teachers?.map((t: Teacher) => t.id) || []
-          );
-          form.setValue(
-            "startTime",
-            moment(subject.startTime).format("YYYY-MM-DDTHH:mm")
-          );
-          form.setValue(
-            "endTime",
-            moment(subject.endTime).format("YYYY-MM-DDTHH:mm")
-          );
+          form.reset({
+            name: subject.name || "",
+            teacherIds: subject.teacherIds || "",
+          })
         } catch (error) {
           console.error("Error fetching subject:", error);
         }
