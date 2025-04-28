@@ -97,7 +97,6 @@ const ManageParent = () => {
     const search = useSearchParams();
     const path = search.get("action");
     const id = search.get("id");
-    console.log(path, id);
 
     const queryClient = useQueryClient();
 
@@ -115,7 +114,6 @@ const ManageParent = () => {
                     const birthday = parentData.birthday
                         ? new Date(parentData.birthday)
                         : undefined;
-                    console.log(parentData);
                     // Reset form values with the fetched data
                     form.reset({
                         username: parentData.username || "",

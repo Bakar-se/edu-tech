@@ -33,7 +33,6 @@ const ExamList = () => {
     queryFn: fetchExams, // fixed here
   });
 
-  console.log(exams);
 
   return (
     <div className="container mx-auto px-4 py-10">

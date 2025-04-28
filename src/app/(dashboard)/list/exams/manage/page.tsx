@@ -54,7 +54,6 @@ const ManageExam = () => {
         mutationFn: async (data: FormData) => {
             if (action === "create") {
                 // create exam api
-                console.log(data);
                 return await axios.post("/api/exams/create", data);
             } else if (action === "edit" && id) {
                 // update exams api

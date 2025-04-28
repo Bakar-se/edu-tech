@@ -74,8 +74,6 @@ const ManageClass = () => {
     queryFn: fetchTeachers,
   });
 
-  console.log(teachers);
-
   const queryClient = useQueryClient();
 
   const [date, setDate] = React.useState<Date>(new Date());
@@ -87,13 +85,13 @@ const ManageClass = () => {
           // get single teacher api
           const response = await axios.get(`/api/classes/getsingleclass/${id}`);
           const classData = response.data.data;
-          console.log(classData);
+
 
           // Convert birthday string to Date object if it exists
           const birthday = classData.birthday
             ? new Date(classData.birthday)
             : undefined;
-          console.log(classData);
+
           // Reset form values with the fetched data
           form.reset({
             name: classData.name || "",

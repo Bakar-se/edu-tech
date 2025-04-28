@@ -26,7 +26,6 @@ export type Result = {
 export const useResultColumns = () => {
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
-  console.log(role);
   const queryClient = useQueryClient();
 
   // delete result api

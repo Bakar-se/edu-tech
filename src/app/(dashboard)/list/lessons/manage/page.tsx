@@ -83,7 +83,6 @@ const ManageLesson = () => {
     queryKey: ["subjects"],
     queryFn: fetchSubjects,
   });
-  console.log(subjects);
   const { data: classes } = useQuery({
     queryKey: ["classes"],
     queryFn: fetchClasses,
@@ -99,7 +98,6 @@ const ManageLesson = () => {
         try {
           const response = await axios.get(`/api/lessons/getlesson/${id}`);
           const lessonData = response.data;
-          console.log(lessonData);
 
           form.reset({
             startTime: moment(lessonData.startTime).format("HH:mm"), // 24-hour format
@@ -122,7 +120,6 @@ const ManageLesson = () => {
       if (action === "create") {
         return await axios.post("/api/lessons/create", data);
       } else if (action === "edit" && id) {
-        console.log(data);
         return await axios.put(`/api/lessons/update/${id}`, data);
       } else {
         throw new Error("Invalid action");
@@ -170,8 +167,8 @@ const ManageLesson = () => {
                             // Add the selected value to the array if it's not already there
                             const newValue = field.value.includes(value)
                               ? field.value.filter(
-                                  (day: string) => day !== value
-                                )
+                                (day: string) => day !== value
+                              )
                               : [...field.value, value];
                             field.onChange(newValue);
                           }}

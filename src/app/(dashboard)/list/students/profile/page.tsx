@@ -5,26 +5,16 @@ import { Performance } from "@/components/Performance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, Droplet, Mail, MailIcon, Phone, Presentation, Shapes, Split, UserRoundCheck } from "lucide-react";
+import Link from "next/link";
 import { convertToCalendarEvents } from "@/lib/convertToCalendarEvents";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  Calendar,
-  Droplet,
-  Mail,
-  MailIcon,
-  Phone,
-  Presentation,
-  Shapes,
-  Split,
-  UserRoundCheck,
-} from "lucide-react";
 import moment from "moment";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export interface Teacher {
+export interface Student {
   id: string;
   username: string;
   name: string;
@@ -43,30 +33,31 @@ export interface Teacher {
   lessons: any[]; // You can replace 'any' with a proper Lesson type if available
 }
 
-const SingleTeacherPage = () => {
+const SingleStudentPage = () => {
   const search = useSearchParams();
   const id = search.get("id");
-  const [teacher, setTeacher] = useState<Teacher>();
+  const [student, setStudent] = useState<Student>();
 
   useEffect(() => {
-    const fetchTeacher = async () => {
+    const fetchStudent = async () => {
       if (id) {
         try {
-          const response = await axios.get(`/api/teachers/getteacher/${id}`);
-          const teacherData = response.data.data;
-          setTeacher(teacherData);
-          console.log(teacherData);
+          const response = await axios.get(`/api/students/getstudnet/${id}`);
+          const studentData = response.data.data;
+          setStudent(studentData);
+          console.log(studentData);
         } catch (error) {
-          console.error("Error fetching teacher:", error);
+          console.error("Error fetching student:", error);
         }
       }
     };
 
-    fetchTeacher();
+    fetchStudent();
   }, [id]);
 
-  const events = convertToCalendarEvents(teacher?.lessons || []);
+  const events = convertToCalendarEvents(student?.lessons || []);
   console.log(events);
+
   return (
     <div>
       <div className="flex flex-col lg:flex-row gap-4 p-4">
@@ -79,12 +70,12 @@ const SingleTeacherPage = () => {
                   src="https://github.com/shadcn.png"
                   alt="@shadcn"
                 />
-                <AvatarFallback>LS</AvatarFallback>
+                <AvatarFallback>AD</AvatarFallback>
               </Avatar>
             </div>
             <div className="flex flex-col justify-between gap-4 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-4">
-                <h1 className="text-xl font-semibold">{`${teacher?.name} ${teacher?.surname}`}</h1>
+                <h1 className="text-xl font-semibold">{`${student?.name} ${student?.surname}`}</h1>
               </div>
               {/* <p className="text-sm text-muted-foreground">
                 Lorem ipsum, dolor sit amet consectetur adipisicing elit.
@@ -92,36 +83,34 @@ const SingleTeacherPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-medium">
                 <div className="flex justify-center md:justify-start items-center gap-2">
                   <Droplet className="h-4 w-4 text-primary" />
-                  <span>{teacher?.bloodType}</span>
+                  <span>{student?.bloodType}</span>
                 </div>
                 <div className="flex justify-center md:justify-start items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span>
-                    {teacher?.birthday
-                      ? moment(teacher.birthday).format("DD MMMM YYYY")
+                    {student?.birthday
+                      ? moment(student.birthday).format("DD MMMM YYYY")
                       : ""}
                   </span>
                 </div>
                 <div className="flex justify-center md:justify-start items-center gap-2 w-full">
                   <MailIcon className="h-4 w-4 text-primary shrink-0" />
-                  <span className="truncate w-full">{teacher?.email}</span>
+                  <span className="truncate w-full">{student?.email}</span>
                 </div>
                 <div className="flex justify-center md:justify-start items-center gap-2 w-full">
                   <Phone className="h-4 w-4 text-primary shrink-0" />
-                  <span className="truncate w-full">{teacher?.phone}</span>
+                  <span className="truncate w-full">{student?.phone}</span>
                 </div>
               </div>
             </div>
             <Link
-              href={`/list/teachers/manage?action=edit&id=${teacher?.id}`}
+              href={`/list/teachers/manage?action=edit&id=${student?.id}`}
               className="bg-primary text-white px-4 py-2 rounded-md text-sm hover:bg-primary/90"
             >
               Edit Profile
             </Link>
-
           </CardContent>
         </Card>
-
         {/* SMALL CARDS */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* ATTENDANCE CARD */}
@@ -136,7 +125,19 @@ const SingleTeacherPage = () => {
               </div>
             </CardContent>
           </Card>
-
+          {/* CARD */}
+          <Card className="w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
+            <div className=" p-4 rounded-md flex items-center gap-4">
+              <Split
+                width={24}
+                height={24}
+              />
+              <div className="">
+                <h1 className="text-xl font-semibold">6</h1>
+                <span className="text-sm text-gray-400">Grade</span>
+              </div>
+            </div>
+          </Card>
           {/* LESSONS CARD */}
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
@@ -147,7 +148,6 @@ const SingleTeacherPage = () => {
               </div>
             </CardContent>
           </Card>
-
           {/* CLASSES CARD */}
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
@@ -164,11 +164,10 @@ const SingleTeacherPage = () => {
         {/* LEFT */}
         <div className="w-full xl:w-2/3">
           {/* TOP */}
-
           {/* BOTTOM */}
           <div className="mt-4 bg-white rounded-md p-4 h-full">
             <h1 className="leading-none font-semibold">
-              Teacher&apos;s Schedule
+              Student&apos;s Schedule
             </h1>
             <BigCalendar events={events} />
           </div>
@@ -180,19 +179,16 @@ const SingleTeacherPage = () => {
             <Card className="p-4">
               <div className="flex gap-4 flex-wrap text-xs text-gray-500">
                 <Link className="" href="/">
-                  <Badge>Teacher&apos;s Classes</Badge>
+                  <Badge>Student&apos;s Classes</Badge>
                 </Link>
                 <Link className="" href="/">
-                  <Badge>Teacher&apos;s Students</Badge>
+                  <Badge>Student&apos;s Lessons</Badge>
                 </Link>
                 <Link className="" href="/">
-                  <Badge>Teacher&apos;s Lessons</Badge>
+                  <Badge>Student&apos;s Exams</Badge>
                 </Link>
                 <Link className="" href="/">
-                  <Badge>Teacher&apos;s Exams</Badge>
-                </Link>
-                <Link className="" href="/">
-                  <Badge>Teacher&apos;s Assignments</Badge>
+                  <Badge>Student&apos;s Assignments</Badge>
                 </Link>
               </div>
             </Card>
@@ -205,4 +201,4 @@ const SingleTeacherPage = () => {
   );
 };
 
-export default SingleTeacherPage;
+export default SingleStudentPage;

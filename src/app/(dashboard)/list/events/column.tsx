@@ -27,7 +27,6 @@ export const useEventColumns = () => {
   const router = useRouter();
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
-  console.log(role);
   const queryClient = useQueryClient();
 
   // delete event api

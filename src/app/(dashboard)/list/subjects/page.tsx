@@ -26,7 +26,6 @@ const SubjectList = () => {
     queryKey: ["subjects"],
     queryFn: fetchSubjects,
   });
-  console.log(subjects);
 
   return (
     <div className="container mx-auto px-4 py-10">

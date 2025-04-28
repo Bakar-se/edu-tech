@@ -76,13 +76,15 @@ const Schema = z.object({
 });
 type FormData = z.infer<typeof Schema>;
 
+const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+
 const ManageTeacher = () => {
   const router = useRouter();
   const [action, setAction] = React.useState<string>("create");
   const search = useSearchParams();
   const path = search.get("action");
   const id = search.get("id");
-  console.log(path, id);
+
 
   const queryClient = useQueryClient();
 
@@ -100,7 +102,6 @@ const ManageTeacher = () => {
           const birthday = teacherData.birthday
             ? new Date(teacherData.birthday)
             : undefined;
-          console.log(teacherData);
           // Reset form values with the fetched data
           form.reset({
             username: teacherData.username || "",
@@ -203,7 +204,15 @@ const ManageTeacher = () => {
       toast.success(
         `Teacher ${action === "create" ? "created" : "updated"} successfully!`
       );
-      router.push("/list/teachers");
+
+      if (userRole === "admin") {
+        router.push("/list/teachers");
+      } else if (userRole === "teacher" && id) {
+        router.push(`/list/teachers/profile?id=${id}`);
+      } else {
+        router.push("/list/teachers");
+      }
+
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["teachers"] });
     },
@@ -302,6 +311,7 @@ const ManageTeacher = () => {
                     <Input
                       type="email"
                       placeholder="Type here"
+                      disabled={action === "edit"}
                       {...form.register("email")}
                     />
                     <FormMessage>

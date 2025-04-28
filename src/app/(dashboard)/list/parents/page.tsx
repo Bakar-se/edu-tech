@@ -15,7 +15,6 @@ const ParentList = () => {
 
   const fetchParents = async () => {
     const response = await axios.get("/api/parents/getallparents");
-    console.log(response)
     return response.data.data;
   };
 
@@ -28,7 +27,6 @@ const ParentList = () => {
     queryFn: fetchParents,
   });
 
-  console.log(parents)
 
   return (
     <div className="container mx-auto px-4 py-10">

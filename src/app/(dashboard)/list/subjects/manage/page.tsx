@@ -112,7 +112,6 @@ const ManageSubject = () => {
   const subjectMutation = useMutation({
     mutationFn: async (data: SubjectSchema) => {
       if (action === "create") {
-        console.log(data);
         return await axios.post("/api/subjects/create", data);
       } else if (action === "edit" && id) {
         return await axios.put(`/api/subjects/update/${id}`, data);

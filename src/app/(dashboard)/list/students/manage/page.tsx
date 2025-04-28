@@ -83,6 +83,8 @@ const Schema = z.object({
 });
 type FormData = z.infer<typeof Schema>;
 
+const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+
 const ManageStudent = () => {
     const router = useRouter();
 
@@ -223,8 +225,18 @@ const ManageStudent = () => {
             }
         },
         onSuccess: () => {
-            toast.success(`Student ${action === "create" ? "created" : "updated"} successfully!`);
-            router.push("/list/students");
+            toast.success(
+                `Student ${action === "create" ? "created" : "updated"} successfully!`
+            );
+
+            if (userRole === "admin") {
+                router.push("/list/students");
+            } else if (userRole === "student" && id) {
+                router.push(`/list/students/profile?id=${id}`);
+            } else {
+                router.push("/list/students");
+            }
+
             form.reset();
             queryClient.invalidateQueries({ queryKey: ["students"] });
         },
@@ -332,6 +344,7 @@ const ManageStudent = () => {
                                         <Input
                                             type="email"
                                             placeholder="Type here"
+                                            disabled={action === "edit"}
                                             {...form.register("email")}
                                         />
                                         <FormMessage>

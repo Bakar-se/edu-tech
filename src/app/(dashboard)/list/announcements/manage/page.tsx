@@ -52,7 +52,6 @@ const ManageAnnouncement = () => {
     const search = useSearchParams();
     const path = search.get("action");
     const id = search.get("id");
-    console.log(path, id);
 
     const queryClient = useQueryClient();
 
