@@ -101,8 +101,8 @@ model Class {
 model Subject {
   id         String       @id @default(uuid())
   name       String       @unique
-  startTime  DateTime
-  endTime    DateTime
+  startTime  DateTime?
+  endTime    DateTime?
   Assignment Assignment[]
   lessons    Lesson[]
   teachers   Teacher[]    @relation("SubjectToTeacher")
@@ -117,7 +117,6 @@ model Lesson {
   teacherId   String
   classId     Int
   Assignment  Assignment[]
-  attendances Attendance[]
   exams       Exam[]
   class       Class        @relation(fields: [classId], references: [id])
   subject     Subject      @relation(fields: [subjectId], references: [id])
@@ -161,11 +160,22 @@ model Attendance {
   id        Int      @id @default(autoincrement())
   date      DateTime
   present   Boolean
+  checkInTime  DateTime
+  checkOutTime DateTime?
   studentId String
-  lessonId  String
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
   student   Student  @relation(fields: [studentId], references: [id])
+  deviceId  String?     // Foreign key to Device
+  device    Device?     @relation(fields: [deviceId], references: [deviceId])
 }
+
+model Device {
+  id          String       @id @default(uuid()) // UUID for internal reference
+  deviceId    String       @unique              // External or custom device ID
+  name        String?
+  createdAt   DateTime     @default(now())
+  attendances Attendance[] // Relation to Attendance
+}
+
 
 model Event {
   id          Int      @id @default(autoincrement())
