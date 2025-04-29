@@ -1,6 +1,6 @@
 "use client";
 
-import ConversationContainer from "@/components/shared/conversation/ConversationContainer";
+import ConversationContainer from "../../../../../../components/shared/conversation/ConversationContainer";
 import { useQuery } from "convex/react";
 import React, { useEffect, useState } from "react";
 import { Id } from "../../../../../../../convex/_generated/dataModel";
@@ -52,8 +52,8 @@ const SingleConversationPage = ({ params }: Props) => {
     conversation.isGroup && Array.isArray(conversation.otherMember)
       ? conversation.otherMember
       : conversation.otherMember
-      ? [conversation.otherMember]
-      : [];
+        ? [conversation.otherMember]
+        : [];
 
   return (
     <ConversationContainer>

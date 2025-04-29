@@ -1,12 +1,14 @@
-import { Card } from '@/components/ui/card'
-import React from 'react'
+import { Card } from "../../../components/ui/card";
+import React from "react";
 
-type Props = React.PropsWithChildren<{}>
+type Props = React.PropsWithChildren<{}>;
 
 const ConversationContainer = ({ children }: Props) => {
   return (
-    <Card className='w-full h-[calc(100vh-32px)] lg:h-full p-2 flex-col gap-2'>{children}</Card>
-  )
-}
+    <Card className="w-full h-[calc(100vh-32px)] lg:h-full p-2 flex-col gap-2">
+      {children}
+    </Card>
+  );
+};
 
-export default ConversationContainer
+export default ConversationContainer;
