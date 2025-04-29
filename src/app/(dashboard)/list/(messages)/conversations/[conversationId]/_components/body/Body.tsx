@@ -1,12 +1,12 @@
 "use client";
-import { useConversation } from "@/hooks/useConversation";
+import { useConversation } from "../../../../../../../../hooks/useConversation";
 import { useQuery } from "convex/react";
 import React, { useEffect } from "react";
 import { api } from "../../../../../../../../../convex/_generated/api";
 import { Id } from "../../../../../../../../../convex/_generated/dataModel";
 import { useAuth } from "@clerk/nextjs";
 import Message from "./Message";
-import { useMutationState } from "@/hooks/useMutationState";
+import { useMutationState } from "../../../../../../../../hooks/useMutationState";
 import {
   Tooltip,
   TooltipContent,
