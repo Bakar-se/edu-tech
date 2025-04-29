@@ -106,6 +106,18 @@ export const menuItems = [
         href: "/list/announcements",
         visible: ["admin", "teacher", "student", "parent"],
       },
+      {
+        icon: <img src="/billing.png" alt="Billing" className="w-5 h-5" />,
+        label: "Billing",
+        href: "/list/billings",
+        visible: ["admin", "parent"],
+      },
+      {
+        icon: <img src="/payment.png" alt="Payment" className="w-5 h-5" />,
+        label: "Payment",
+        href: "/list/payments",
+        visible: ["admin", "parent"],
+      },
     ],
   },
   {
