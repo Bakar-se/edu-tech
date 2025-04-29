@@ -2,7 +2,9 @@
   "build": {
     "env": {
       "NODE_ENV": "production"
-    }
-  },
-  "installCommand": "npm install --force"
+    },
+    "installCommand": "npm install --force",
+    "buildCommand": "next build",
+    "outputDirectory": ".next"
+  }
 }
