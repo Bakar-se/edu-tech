@@ -27,8 +27,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import type { Teacher } from "../../teachers/columns";
 import type { Class } from "../../classes/column";
-import { Subject } from "@prisma/client";
 import moment from "moment";
+import { Subject } from "../../subjects/column";
 
 const Schema = z.object({
   startTime: z.string().min(1),
@@ -167,8 +167,8 @@ const ManageLesson = () => {
                             // Add the selected value to the array if it's not already there
                             const newValue = field.value.includes(value)
                               ? field.value.filter(
-                                (day: string) => day !== value
-                              )
+                                  (day: string) => day !== value
+                                )
                               : [...field.value, value];
                             field.onChange(newValue);
                           }}
