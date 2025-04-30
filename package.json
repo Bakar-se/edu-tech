@@ -10,7 +10,6 @@
     "vercel-build": "npm install --legacy-peer-deps && next build"
   },
   "dependencies": {
-    "@clerk/clerk-sdk-node": "^4.13.23",
     "@clerk/elements": "^0.23.5",
     "@clerk/nextjs": "^6.12.8",
     "@hookform/resolvers": "^4.1.2",
