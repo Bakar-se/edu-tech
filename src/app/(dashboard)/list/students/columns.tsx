@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Edit, Eye, Trash } from "lucide-react";
+import { Download, Edit, Eye, QrCode, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +12,14 @@ import axios from "axios";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { QRCodeCanvas } from "qrcode.react";
 
 export type Student = {
   id: string;
@@ -26,11 +34,29 @@ export type Student = {
 
 // ✅ Wrap columns inside a function to get role dynamically
 export const useStudentColumns = () => {
-  const router = useRouter();
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
 
   const queryClient = useQueryClient();
+
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const qrRef = useRef<HTMLCanvasElement | null>(null);
+
+  const handleQrOpen = (student: Student) => {
+    setSelectedStudent(student);
+    setIsQrModalOpen(true);
+  };
+
+  const downloadQr = () => {
+    if (qrRef.current) {
+      const url = qrRef.current.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedStudent?.name}-${selectedStudent?.surname}.png`;
+      a.click();
+    }
+  };
 
   // delete student api
 
@@ -114,41 +140,56 @@ export const useStudentColumns = () => {
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Student> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/students/profile?id=${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link
-                href={`/list/students/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Student> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/students/profile?id=${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Student"
-                description="This action cannot be undone. This will permanently delete the student and remove their data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/students/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleQrOpen(row.original)}
+                >
+                  <QrCode />
+                </Button>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Student"
+                  description="This action cannot be undone. This will permanently delete the student and remove their data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
-  return columns;
+  return {
+    columns,
+    selectedStudent,
+    isQrModalOpen,
+    setIsQrModalOpen,
+    setSelectedStudent,
+    qrRef,
+    downloadQr,
+  };
 };

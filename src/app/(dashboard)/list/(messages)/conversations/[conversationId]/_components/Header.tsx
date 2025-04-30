@@ -1,8 +1,17 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../../../../../components/ui/avatar";
+import { Button } from "../../../../../../../components/ui/button";
+import { Card } from "../../../../../../../components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../../../../../components/ui/dropdown-menu";
+import { cn } from "../../../../../../../lib/utils";
 import { CircleArrowLeft, Settings } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -35,7 +44,9 @@ const Header = (props: Props) => {
         {props?.options ? (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button asChild size="icon" variant="secondary"><Settings /></Button>
+              <Button asChild size="icon" variant="secondary">
+                <Settings />
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {props?.options.map((option, id) => (
@@ -49,8 +60,6 @@ const Header = (props: Props) => {
                   {option.label}
                 </DropdownMenuItem>
               ))}
-
-
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
