@@ -24,7 +24,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export interface Student {
+interface Student {
   id: string;
   username: string;
   name: string;
@@ -35,12 +35,42 @@ export interface Student {
   img: string | null;
   bloodType: string;
   sex: "MALE" | "FEMALE";
-  createdAt: string; // ISO date string
-  birthday: string; // ISO date string
+  createdAt: string;
+  birthday: string;
   password: string;
-  subjects: any[]; // You can replace 'any' with a proper Subject type if available
-  classes: any[]; // You can replace 'any' with a proper Class type if available
-  lessons: any[]; // You can replace 'any' with a proper Lesson type if available
+  class?: {
+    id: number;
+    name: string;
+    capacity: number;
+    lessons: {
+      id: string;
+      startTime: string;
+      endTime: string;
+      day: string[];
+      subjectId: string;
+      teacherId: string;
+      classId: number;
+    }[];
+  };
+  parent?: {
+    id: string;
+    username: string;
+    name: string;
+    surname: string;
+    email: string;
+    phone: string;
+    address: string;
+    bloodType: string;
+    sex: "MALE" | "FEMALE";
+    birthday: string;
+    occupation: string;
+    emergencyContact: string;
+    nationality: string;
+    password: string;
+    createdAt: string;
+    updatedAt: string;
+    relationship: string;
+  };
 }
 
 const SingleStudentPage = () => {
@@ -54,8 +84,38 @@ const SingleStudentPage = () => {
         try {
           const response = await axios.get(`/api/students/getstudent/${id}`);
           const studentData = response.data.data;
-          setStudent(studentData);
-          console.log(studentData);
+
+          // Fetch the class and subject details for each lesson
+          const lessonsWithFullData = await Promise.all(
+            studentData.class.lessons.map(async (lesson: any) => {
+              // Fetch subject by subjectId
+              const subjectResponse = await axios.get(
+                `/api/subjects/${lesson.subjectId}`
+              );
+              const subject = subjectResponse.data;
+
+              // Fetch class by classId
+              const classResponse = await axios.get(
+                `/api/classes/${lesson.classId}`
+              );
+              const classData = classResponse.data;
+
+              return {
+                ...lesson,
+                class: classData, // Attach class info
+                subject: subject, // Attach subject info
+              };
+            })
+          );
+
+          // Set the student data with fully populated lessons
+          setStudent({
+            ...studentData,
+            class: {
+              ...studentData.class,
+              lessons: lessonsWithFullData, // Update the lessons with full data
+            },
+          });
         } catch (error) {
           console.error("Error fetching student:", error);
         }
@@ -64,9 +124,8 @@ const SingleStudentPage = () => {
 
     fetchStudent();
   }, [id]);
+  const events = convertToCalendarEvents(student?.class?.lessons || []);
 
-  const events = convertToCalendarEvents(student?.lessons || []);
-  console.log(events);
   return (
     <div>
       <div className="flex flex-col lg:flex-row gap-4 p-4">

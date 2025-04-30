@@ -20,9 +20,9 @@ interface ClassData {
   };
 }
 
-export const convertToCalendarEvents = (data: ClassData[]): Event[] => {
-  return data.flatMap((item) => {
-    return item.day.map((day) => {
+export const convertToCalendarEvents = (data: any): any[] => {
+  return data.flatMap((item: any) => {
+    return item.day.map((day: any) => {
       const start = new Date(item.startTime);
       const end = new Date(item.endTime);
 

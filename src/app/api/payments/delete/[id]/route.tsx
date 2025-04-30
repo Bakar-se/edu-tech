@@ -1,29 +1,40 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "DELETE") {
-        return res.status(405).json({ message: "Method not allowed" });
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  if (!id || typeof id !== "string") {
+    return NextResponse.json(
+      { message: "Invalid or missing payment ID" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const payment = await prisma.payment.findUnique({ where: { id } });
+
+    if (!payment) {
+      return NextResponse.json(
+        { message: "Payment not found" },
+        { status: 404 }
+      );
     }
 
-    const { id } = req.query;
+    await prisma.payment.delete({ where: { id } });
 
-    if (!id || typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid or missing payment ID" });
-    }
-
-    try {
-        const payment = await prisma.payment.findUnique({ where: { id } });
-
-        if (!payment) {
-            return res.status(404).json({ message: "Payment not found" });
-        }
-
-        await prisma.payment.delete({ where: { id } });
-
-        return res.status(200).json({ message: "Payment deleted successfully" });
-    } catch (error) {
-        console.error("Error deleting payment:", error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
+    return NextResponse.json(
+      { message: "Payment deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting payment:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

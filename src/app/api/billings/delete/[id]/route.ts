@@ -1,31 +1,36 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { method } = req;
-    const { id } = req.query;
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
-    if (!id || typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid billing ID" });
-    }
+  if (!id || typeof id !== "string") {
+    return NextResponse.json(
+      { message: "Invalid billing ID" },
+      { status: 400 }
+    );
+  }
 
-    if (method === "DELETE") {
-        try {
-            // Delete the billing record from the database using Prisma
-            const deletedBilling = await prisma.billing.delete({
-                where: { id },
-            });
+  try {
+    const deletedBilling = await prisma.billing.delete({
+      where: { id },
+    });
 
-            return res.status(200).json({
-                message: "Billing record deleted successfully",
-                data: deletedBilling,
-            });
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: "Failed to delete billing record" });
-        }
-    } else {
-        // Method Not Allowed
-        return res.status(405).json({ message: `Method ${method} Not Allowed` });
-    }
+    return NextResponse.json(
+      {
+        message: "Billing record deleted successfully",
+        data: deletedBilling,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Failed to delete billing record:", error);
+    return NextResponse.json(
+      { message: "Failed to delete billing record" },
+      { status: 500 }
+    );
+  }
 }

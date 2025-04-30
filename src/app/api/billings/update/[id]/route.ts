@@ -1,52 +1,51 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { id } = req.query;
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
-    if (req.method !== "PUT") {
-        return res.status(405).json({ message: "Method not allowed" });
+  if (!id || typeof id !== "string") {
+    return NextResponse.json(
+      { message: "Invalid or missing billing ID" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const body = await req.json();
+    const { billName, month, amount, dueDate, description, classId } = body;
+
+    if (!billName || !month || !amount || !dueDate || !description) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    if (!id || typeof id !== "string") {
-        return res.status(400).json({ message: "Invalid or missing billing ID" });
-    }
-
-    const {
+    const updatedBilling = await prisma.billing.update({
+      where: { id },
+      data: {
         billName,
         month,
-        amount,
-        dueDate,
+        amount: parseFloat(amount),
+        dueDate: new Date(dueDate),
         description,
-        classId,
-    } = req.body;
+        classId: classId ? Number(classId) : null,
+      },
+    });
 
-    if (
-        !billName ||
-        !month ||
-        !amount ||
-        !dueDate ||
-        !description
-    ) {
-        return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    try {
-        const updatedBilling = await prisma.billing.update({
-            where: { id: id },
-            data: {
-                billName,
-                month,
-                amount: parseFloat(amount),
-                dueDate: new Date(dueDate),
-                description,
-                classId: classId ? Number(classId) : null,
-            },
-        });
-
-        res.status(200).json({ message: "Billing updated successfully", data: updatedBilling });
-    } catch (error) {
-        console.error("Update billing error:", error);
-        res.status(500).json({ message: "Failed to update billing" });
-    }
+    return NextResponse.json({
+      message: "Billing updated successfully",
+      data: updatedBilling,
+    });
+  } catch (error) {
+    console.error("Update billing error:", error);
+    return NextResponse.json(
+      { message: "Failed to update billing" },
+      { status: 500 }
+    );
+  }
 }

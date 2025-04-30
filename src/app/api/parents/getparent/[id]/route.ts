@@ -13,12 +13,16 @@ export async function GET(
       { status: 400 }
     );
   }
-
+  console.log(id);
   try {
     const parent = await prisma.parent.findUnique({
       where: { id },
       include: {
-        students: true,
+        students: {
+          include: {
+            class: { include: { lessons: { include: { subject: true } } } },
+          },
+        },
       },
     });
 

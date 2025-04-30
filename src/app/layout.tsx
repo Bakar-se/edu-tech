@@ -2,19 +2,21 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import { Query } from "@tanstack/react-query";
-import QueryProvider from "@/lib/QueryProvider";
+import { TooltipProvider } from "../components/ui/tooltip";
+import { ConvexClientProvider } from "../components/ConvexClientProvider";
+import QueryProvider from "../lib/QueryProvider";
 
+// Load fonts (make sure `display: "swap"` or similar is added for safety)
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-sans",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -24,16 +26,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <ConvexClientProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
+        <html
+          lang="en"
+          className={`${geistSans.variable} ${geistMono.variable}`}
+        >
+          <body className="antialiased">
             <TooltipProvider>
               <QueryProvider>{children}</QueryProvider>
             </TooltipProvider>
