@@ -34,6 +34,7 @@ model Student {
   class       Class?       @relation(fields: [classId], references: [id])
   grade       Grade?       @relation(fields: [gradeId], references: [id])
   parent      Parent?      @relation(fields: [parentId], references: [id])
+
 }
 
 model Teacher {
@@ -96,6 +97,8 @@ model Class {
   events        Event[]
   lessons       Lesson[]
   students      Student[]
+
+  Billing Billing[]
 }
 
 model Subject {
@@ -195,6 +198,30 @@ model Announcement {
   classId     Int?
   class       Class?   @relation(fields: [classId], references: [id])
 }
+model Billing {
+  id          String   @id @default(uuid())
+  billName    String   // Name of the bill (e.g., Tuition Fee)
+  month       String   // Month for which the bill is generated
+  amount      Float    // Bill amount
+  dueDate     DateTime // Due date for payment
+  description String   // Description of the bill
+   classId     Int?     // Ensure this field exists (nullable if needed)
+  class       Class?   @relation(fields: [classId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  payments    Payment[]
+}
+model Payment {
+  id            String   @id @default(uuid())
+  transactionId String
+  image         String   // Store image URL or path
+  billingId     String   // FK to Billing
+  billing       Billing  @relation(fields: [billingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 
 enum UserSex {
   MALE
