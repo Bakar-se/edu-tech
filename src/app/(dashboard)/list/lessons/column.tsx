@@ -157,7 +157,7 @@ export const useLessonColumns = () => {
         );
       },
     },
-    ...(role === "admin"
+    ...(role === "admin" || "teacher"
       ? [
           {
             id: "action",

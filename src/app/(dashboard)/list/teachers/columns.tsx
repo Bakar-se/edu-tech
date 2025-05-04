@@ -12,6 +12,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 export type Teacher = {
   id: string;
@@ -99,12 +100,32 @@ export const useTeacherColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Subjects" />
       ),
+      cell: ({ row }) => {
+        const subjects = row.original.subjects || [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {subjects.map((subject: any) => (
+              <Badge key={subject.id}>{subject.name}</Badge>
+            ))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "classes",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Classes" />
       ),
+      cell: ({ row }) => {
+        const classes = row.original.classes || [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {classes.map((classe: any) => (
+              <Badge key={classe.id}>{classe.name}</Badge>
+            ))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "phone",
@@ -118,39 +139,39 @@ export const useTeacherColumns = () => {
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Teacher> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/teachers/profile?id=${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link
-                href={`/list/teachers/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Teacher> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/teachers/profile?id=${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Teacher"
-                description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/teachers/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Teacher"
+                  description="This action cannot be undone. This will permanently delete the teacher and remove their data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

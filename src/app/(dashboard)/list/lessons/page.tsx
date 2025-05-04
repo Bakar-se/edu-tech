@@ -8,10 +8,13 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useLessonColumns } from "./column";
+import { useUser } from "@clerk/nextjs";
 
 const LessonList = () => {
   const router = useRouter();
   const columns = useLessonColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   // Fetch lessons
   const fetchLessons = async () => {
@@ -27,12 +30,15 @@ const LessonList = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Lessons</h1>
-        <Button
-          className="mb-4 flex items-center"
-          onClick={() => router.push("/list/lessons/manage?action=create")}
-        >
-          <PlusCircle className="mr-2" /> Create Lesson
-        </Button>
+        {role === "admin" ||
+          (role === "teacher" && (
+            <Button
+              className="mb-4 flex items-center"
+              onClick={() => router.push("/list/lessons/manage?action=create")}
+            >
+              <PlusCircle className="mr-2" /> Create Lesson
+            </Button>
+          ))}
       </div>
 
       {isLoading ? (

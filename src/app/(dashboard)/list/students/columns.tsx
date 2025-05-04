@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { QRCodeCanvas } from "qrcode.react";
+import { Badge } from "@/components/ui/badge";
 
 export type Student = {
   id: string;
@@ -127,6 +128,16 @@ export const useStudentColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Classes" />
       ),
+      cell: ({ row }) => {
+        const classes = row.original.classes || [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {classes.map((classe: any) => (
+              <Badge key={classe.id}>{classe.name}</Badge>
+            ))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "phone",

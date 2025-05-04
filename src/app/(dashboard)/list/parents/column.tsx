@@ -111,9 +111,9 @@ export const useParentColumns = () => {
       cell: ({ row }) => {
         const students = row.original.students || [];
         return (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap gap-1">
             {students.map((student) => (
-              <Badge className="m-1" key={student.id}>
+              <Badge key={student.id}>
                 {student.name} {student.surname}
               </Badge>
             ))}
@@ -136,39 +136,39 @@ export const useParentColumns = () => {
 
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Parent> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/parents/profile?id=${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link
-                href={`/list/parents/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Parent> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/parents/profile?id=${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Parent"
-                description="This action cannot be undone. This will permanently delete the parent and remove their data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id);
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/parents/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Parent"
+                  description="This action cannot be undone. This will permanently delete the parent and remove their data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

@@ -8,10 +8,13 @@ import { useClassColumns } from "./column";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 
 const StudentList = () => {
   const router = useRouter();
   const columns = useClassColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   const fetchTeachers = async () => {
     const response = await axios.get("/api/classes/getallclasses");
@@ -31,12 +34,14 @@ const StudentList = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Classes</h1>
-        <Button
-          onClick={() => router.push("/list/classes/manage?action=create")}
-          className="mb-4 flex items-center"
-        >
-          <PlusCircle /> Register Class
-        </Button>
+        {role === "admin" && (
+          <Button
+            onClick={() => router.push("/list/classes/manage?action=create")}
+            className="mb-4 flex items-center"
+          >
+            <PlusCircle /> Register Class
+          </Button>
+        )}
       </div>
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />

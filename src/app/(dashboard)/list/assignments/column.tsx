@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { Badge } from "@/components/ui/badge";
 
 export type Assignment = {
   id: number;
@@ -75,18 +76,10 @@ export const useAssignmentColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Subject" />
       ),
-    },
-    {
-      accessorKey: "class",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Class" />
-      ),
-    },
-    {
-      accessorKey: "teacher",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Teacher" />
-      ),
+      cell: ({ row }) => {
+        const subject = row.original.subject as any;
+        return <Badge>{subject.name}</Badge>;
+      },
     },
     {
       accessorKey: "dueDate",
@@ -94,7 +87,7 @@ export const useAssignmentColumns = () => {
         <DataTableColumnHeader column={column} title="Due Date" />
       ),
     },
-    ...(role === "teacher"
+    ...(role === "admin" || "teacher"
       ? [
           {
             id: "action",

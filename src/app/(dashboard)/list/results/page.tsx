@@ -8,6 +8,7 @@ import { useResultColumns } from "./column";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 
 // Function to fetch results data
 const fetchResults = async () => {
@@ -18,6 +19,8 @@ const fetchResults = async () => {
 const ResultList = () => {
   const router = useRouter();
   const columns = useResultColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   const {
     data: results,
@@ -27,23 +30,29 @@ const ResultList = () => {
     queryKey: ["results"],
     queryFn: fetchResults,
   });
-  console.log(results)
+  console.log(results);
 
   if (isError) {
-    return <div className="text-red-500">Error fetching results. Please try again later.</div>;
+    return (
+      <div className="text-red-500">
+        Error fetching results. Please try again later.
+      </div>
+    );
   }
-
+  console.log(results);
   return (
     <div className="container mx-auto px-4 py-10">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Results</h1>
-        <Button
-          onClick={() => router.push("/list/results/manage?action=create")}
-          className="flex items-center gap-2"
-        >
-          <PlusCircle className="h-5 w-5" /> Register Result
-        </Button>
+        {role === "admin" && (
+          <Button
+            onClick={() => router.push("/list/results/manage?action=create")}
+            className="flex items-center gap-2"
+          >
+            <PlusCircle className="h-5 w-5" /> Register Result
+          </Button>
+        )}
       </div>
 
       {/* Loading or Data Table */}

@@ -8,10 +8,13 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { useDeviceColumns } from "./column";
+import { useUser } from "@clerk/nextjs";
 
 const Devices = () => {
   const router = useRouter();
   const columns = useDeviceColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   const fetchDevices = async () => {
     const response = await axios.get("/api/devices/getalldevices");
@@ -38,12 +41,14 @@ const Devices = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Devices</h1>
-        <Button
-          onClick={() => router.push("/list/devices/manage?action=create")}
-          className="mb-4 flex items-center"
-        >
-          <PlusCircle className="mr-2" /> Register Device
-        </Button>
+        {role === "admin" && (
+          <Button
+            onClick={() => router.push("/list/devices/manage?action=create")}
+            className="mb-4 flex items-center"
+          >
+            <PlusCircle className="mr-2" /> Register Device
+          </Button>
+        )}
       </div>
 
       {isLoading ? (

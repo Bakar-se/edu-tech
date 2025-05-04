@@ -8,10 +8,13 @@ import { useTeacherColumns } from "./columns";
 import axios from "axios";
 import { toast } from "sonner"; // or any toast library you use
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 
 const TeacherList = () => {
   const router = useRouter();
   const columns = useTeacherColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   const fetchTeachers = async () => {
     const response = await axios.get("/api/teachers/getallteachers");
@@ -26,17 +29,19 @@ const TeacherList = () => {
     queryKey: ["teachers"],
     queryFn: fetchTeachers,
   });
-
+  console.log(teachers);
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Teachers</h1>
-        <Button
-          className="mb-4 flex items-center"
-          onClick={() => router.push("/list/teachers/manage?action=create")}
-        >
-          <PlusCircle className="mr-2" /> Register Teacher
-        </Button>
+        {role === "admin" && (
+          <Button
+            className="mb-4 flex items-center"
+            onClick={() => router.push("/list/teachers/manage?action=create")}
+          >
+            <PlusCircle className="mr-2" /> Register Teacher
+          </Button>
+        )}
       </div>
 
       {isLoading ? (

@@ -4,7 +4,7 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { Edit, Eye, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox";
 import { role } from "@/lib/data";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 export type Announcement = {
   id: number;
@@ -31,7 +32,9 @@ export const useAnnouncementColumns = () => {
 
   const deleteAnnouncementMutation = useMutation({
     mutationFn: async (announcementId: string) => {
-      const res = await axios.delete(`/api/announcements/delete/${announcementId}`);
+      const res = await axios.delete(
+        `/api/announcements/delete/${announcementId}`
+      );
       return res.data;
     },
     onSuccess: () => {
@@ -83,6 +86,10 @@ export const useAnnouncementColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Class" />
       ),
+      cell: ({ row }) => {
+        const classe = row.original.class as any;
+        return <Badge>{classe.name}</Badge>;
+      },
     },
     {
       accessorKey: "date",
@@ -92,39 +99,39 @@ export const useAnnouncementColumns = () => {
     },
     ...(role === "admin"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Announcement> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/announcements/profile/${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye />
-                </Button>
-              </Link>
-              <Link
-                href={`/list/announcements/manage?action=edit&id=${row.original.id}`}
-              >
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Announcement> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link href={`/list/announcements/profile/${row.original.id}`}>
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Eye />
                   </Button>
-                }
-                title="Delete Announcement"
-                description="This action cannot be undone. This will permanently delete the announcement and remove their data from our servers."
-                onDelete={() => {
-                  handleDelete(row.original.id.toString());
-                }}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <Link
+                  href={`/list/announcements/manage?action=edit&id=${row.original.id}`}
+                >
+                  <Button variant="ghost" size="icon">
+                    <Edit />
+                  </Button>
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Announcement"
+                  description="This action cannot be undone. This will permanently delete the announcement and remove their data from our servers."
+                  onDelete={() => {
+                    handleDelete(row.original.id.toString());
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
