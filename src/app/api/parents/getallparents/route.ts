@@ -22,6 +22,7 @@ export async function GET() {
                 bloodType: true,
                 createdAt: true,
                 updatedAt: true,
+                students: true,
             },
         });
         console.log(parents)

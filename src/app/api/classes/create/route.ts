@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, capacity, supervisorId, gradeId } = body;
+    const { name, capacity, teacherId, gradeId } = body;
 
     // Basic validation
     if (!name || !capacity) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       data: {
         name,
         capacity: Number(capacity),
-        supervisorId: supervisorId || null,
+        teacherId: teacherId || null,
         gradeId: gradeId === 0 ? null : gradeId,
       },
     });

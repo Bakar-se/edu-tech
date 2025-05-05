@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { Badge } from "@/components/ui/badge";
 
 export type Result = {
   id: number;
@@ -25,7 +26,8 @@ export const useResultColumns = () => {
   const queryClient = useQueryClient();
 
   const deleteResultMutation = useMutation({
-    mutationFn: (resultId: number) => axios.delete(`/api/results/delete/${resultId}`),
+    mutationFn: (resultId: number) =>
+      axios.delete(`/api/results/delete/${resultId}`),
     onSuccess: () => {
       toast.success("Result deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["results"] });
@@ -64,42 +66,58 @@ export const useResultColumns = () => {
     },
     {
       accessorKey: "subject",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Subject" />
+      ),
+      cell: ({ row }) => {
+        const subject = row.original.subject as any;
+        return <Badge>{subject.name}</Badge>;
+      },
     },
     {
       accessorKey: "class",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Class" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Class" />
+      ),
+      cell: ({ row }) => {
+        const classe = row.original.class as any;
+        return <Badge>{classe.name}</Badge>;
+      },
     },
     {
       accessorKey: "grade",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Grade" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Grade" />
+      ),
     },
     ...(role === "admin" || role === "teacher"
       ? [
-        {
-          id: "action",
-          header: () => <div className="text-center">Action</div>,
-          cell: ({ row }: { row: Row<Result> }) => (
-            <div className="flex items-center justify-center space-x-2">
-              <Link href={`/list/results/manage?action=edit&id=${row.original.id}`}>
-                <Button variant="ghost" size="icon">
-                  <Edit />
-                </Button>
-              </Link>
-              <DeleteDialog
-                trigger={
+          {
+            id: "action",
+            header: () => <div className="text-center">Action</div>,
+            cell: ({ row }: { row: Row<Result> }) => (
+              <div className="flex items-center justify-center space-x-2">
+                <Link
+                  href={`/list/results/manage?action=edit&id=${row.original.id}`}
+                >
                   <Button variant="ghost" size="icon">
-                    <Trash className="text-destructive" />
+                    <Edit />
                   </Button>
-                }
-                title="Delete Result"
-                description="This action cannot be undone. This will permanently delete the result."
-                onDelete={() => handleDelete(row.original.id)}
-              />
-            </div>
-          ),
-        },
-      ]
+                </Link>
+                <DeleteDialog
+                  trigger={
+                    <Button variant="ghost" size="icon">
+                      <Trash className="text-destructive" />
+                    </Button>
+                  }
+                  title="Delete Result"
+                  description="This action cannot be undone. This will permanently delete the result."
+                  onDelete={() => handleDelete(row.original.id)}
+                />
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 

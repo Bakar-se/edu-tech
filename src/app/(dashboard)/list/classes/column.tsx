@@ -11,12 +11,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { Badge } from "@/components/ui/badge";
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react";
 
 export type Class = {
   id: number;
   name: string;
   capacity: number;
-  supervisor: {
+  teacher: {
+    id: string;
     name: string;
     surname: string;
   };
@@ -86,49 +89,52 @@ export const useClassColumns = () => {
       ),
     },
     {
-      accessorKey: "supervisor",
+      accessorKey: "teacher",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Supervisor" />
+        <DataTableColumnHeader column={column} title="Teacher" />
       ),
       cell: ({ row }: { row: Row<Class> }) => {
-        const supervisor = row.original.supervisor;
-        return supervisor ? (
-          <div>{`${supervisor.name} ${supervisor.surname}`}</div>
-        ) : (
-          <div className="text-muted-foreground italic">No Supervisor</div>
+        const teacher = row.original.teacher; // This is a single object, not an array.
+
+        return (
+          <div className="flex flex-wrap">
+            <Badge key={teacher.id}>
+              {teacher.name} {teacher.surname}
+            </Badge>
+          </div>
         );
       },
     },
     ...(role === "admin"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Class> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link
-                  href={`/list/classes/manage?action=edit&id=${row.original.id}`}
-                >
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Class> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link
+                href={`/list/classes/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <DeleteDialog
+                trigger={
                   <Button variant="ghost" size="icon">
-                    <Edit />
+                    <Trash className="text-destructive" />
                   </Button>
-                </Link>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Class"
-                  description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
-                  onDelete={() => {
-                    handleDelete(row.original.id);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+                }
+                title="Delete Class"
+                description="This action cannot be undone. This will permanently delete the class and remove its data from our servers."
+                onDelete={() => {
+                  handleDelete(row.original.id);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

@@ -5,6 +5,7 @@ import { Edit, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
+import { role } from "@/lib/data";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +33,9 @@ export const useAnnouncementColumns = () => {
 
   const deleteAnnouncementMutation = useMutation({
     mutationFn: async (announcementId: string) => {
-      const res = await axios.delete(`/api/announcements/delete/${announcementId}`);
+      const res = await axios.delete(
+        `/api/announcements/delete/${announcementId}`
+      );
       return res.data;
     },
     onSuccess: () => {
@@ -84,6 +87,10 @@ export const useAnnouncementColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Class" />
       ),
+      cell: ({ row }) => {
+        const classe = row.original.class as any;
+        return <Badge>{classe.name}</Badge>;
+      },
     },
     {
       accessorKey: "date",

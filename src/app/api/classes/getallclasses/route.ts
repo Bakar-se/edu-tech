@@ -1,4 +1,3 @@
-// /api/classes/getall/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -6,7 +5,7 @@ export async function GET() {
   try {
     const classes = await prisma.class.findMany({
       include: {
-        supervisor: true,
+        teacher: true,
       },
     });
     return NextResponse.json({ data: classes }, { status: 200 });

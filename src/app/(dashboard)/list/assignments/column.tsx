@@ -78,18 +78,10 @@ export const useAssignmentColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Subject" />
       ),
-    },
-    {
-      accessorKey: "class",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Class" />
-      ),
-    },
-    {
-      accessorKey: "teacher",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Teacher" />
-      ),
+      cell: ({ row }) => {
+        const subject = row.original.subject as any;
+        return <Badge>{subject.name}</Badge>;
+      },
     },
     {
       accessorKey: "dueDate",

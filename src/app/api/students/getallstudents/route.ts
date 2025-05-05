@@ -7,7 +7,6 @@ export async function GET() {
             orderBy: { createdAt: "desc" }, // Optional: newest first
             include: {
                 class: true, // Include related class data
-                grade: true, // Include related grade data
                 parent: true, // Optional: include related parent data
             },
         });

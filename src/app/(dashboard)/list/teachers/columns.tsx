@@ -100,13 +100,16 @@ export const useTeacherColumns = () => {
     {
       accessorKey: "subject",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Subject" />
+        <DataTableColumnHeader column={column} title="Subjects" />
       ),
-      cell: ({ row }: { row: Row<Teacher> }) => {
-        const subject = row.original.subject; // This is a single object, not an array.
-
+      cell: ({ row }) => {
+        const subjects = row.original.subjects || [];
         return (
-          <Badge>{subject.name}</Badge> // Display the name of the subject
+          <div className="flex flex-wrap gap-1">
+            {subjects.map((subject: any) => (
+              <Badge key={subject.id}>{subject.name}</Badge>
+            ))}
+          </div>
         );
       },
     },
@@ -115,11 +118,14 @@ export const useTeacherColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Class" />
       ),
-      cell: ({ row }: { row: Row<Teacher> }) => {
-        const classInfo = row.original.class; // This is a single object, not an array.
-
+      cell: ({ row }) => {
+        const classes = row.original.classes || [];
         return (
-          <Badge>{classInfo.name}</Badge> // Display the name of the class
+          <div className="flex flex-wrap gap-1">
+            {classes.map((classe: any) => (
+              <Badge key={classe.id}>{classe.name}</Badge>
+            ))}
+          </div>
         );
       },
     },

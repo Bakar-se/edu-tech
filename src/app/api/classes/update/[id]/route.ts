@@ -9,14 +9,14 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, capacity, supervisorId, gradeId } = body;
+    const { name, capacity, teacherId, gradeId } = body;
 
     const updatedClass = await prisma.class.update({
       where: { id: Number(id) },
       data: {
         name,
         capacity: Number(capacity),
-        supervisorId: supervisorId || null,
+        teacherId: teacherId || null,
       },
     });
 

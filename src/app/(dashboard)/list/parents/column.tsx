@@ -75,7 +75,7 @@ export const useParentColumns = () => {
           aria-label="Select all"
         />
       ),
-      cell: ({ row }: { row: Row<Parent> }) => (
+      cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -111,7 +111,7 @@ export const useParentColumns = () => {
       cell: ({ row }) => {
         const students = row.original.students || [];
         return (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap gap-1">
             {students.map((student) => (
               <Badge className="m-1" key={student.id}>
                 {student.name} {student.surname}

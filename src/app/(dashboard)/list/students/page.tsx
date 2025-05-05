@@ -15,9 +15,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { QRCodeCanvas } from "qrcode.react";
+import { useUser } from "@clerk/nextjs";
 
 const StudentList = () => {
   const router = useRouter();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
   const {
     columns,
     selectedStudent,
@@ -46,12 +49,14 @@ const StudentList = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Students</h1>
-        <Button
-          onClick={() => router.push("/list/students/manage?action=create")}
-          className="mb-4 flex items-center"
-        >
-          <PlusCircle /> Register Student
-        </Button>
+        {role === "admin" && (
+          <Button
+            onClick={() => router.push("/list/students/manage?action=create")}
+            className="mb-4 flex items-center"
+          >
+            <PlusCircle /> Register Student
+          </Button>
+        )}
       </div>
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />

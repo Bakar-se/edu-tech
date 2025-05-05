@@ -20,20 +20,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { QRCodeCanvas } from "qrcode.react";
+import { Badge } from "@/components/ui/badge";
 
 export type Student = {
+  students: never[];
+  classes: never[];
   id: string;
   studentId: string;
   name: string;
   surname: string;
   email: string;
   phone: string;
-  classes: string[];
+  class: {
+    id: number;
+    name: string;
+  };
   address: string;
 };
 
 // ✅ Wrap columns inside a function to get role dynamically
 export const useStudentColumns = () => {
+  const router = useRouter();
   const { user } = useUser();
   const role = user?.publicMetadata.role as string | undefined;
 
@@ -123,10 +130,17 @@ export const useStudentColumns = () => {
       ),
     },
     {
-      accessorKey: "classes",
+      accessorKey: "class",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Classes" />
+        <DataTableColumnHeader column={column} title="Class" />
       ),
+      cell: ({ row }: { row: Row<Student> }) => {
+        const classInfo = row.original.class; // This is a single object, not an array.
+
+        return (
+          <Badge>{classInfo.name}</Badge> // Display the name of the class
+        );
+      },
     },
     {
       accessorKey: "phone",
@@ -140,46 +154,46 @@ export const useStudentColumns = () => {
     },
     ...(role === "admin"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Student> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link href={`/list/students/profile?id=${row.original.id}`}>
-                  <Button variant="ghost" size="icon">
-                    <Eye />
-                  </Button>
-                </Link>
-                <Link
-                  href={`/list/students/manage?action=edit&id=${row.original.id}`}
-                >
-                  <Button variant="ghost" size="icon">
-                    <Edit />
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleQrOpen(row.original)}
-                >
-                  <QrCode />
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Student> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link href={`/list/students/profile?id=${row.original.id}`}>
+                <Button variant="ghost" size="icon">
+                  <Eye />
                 </Button>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Student"
-                  description="This action cannot be undone. This will permanently delete the student and remove their data from our servers."
-                  onDelete={() => {
-                    handleDelete(row.original.id);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+              </Link>
+              <Link
+                href={`/list/students/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleQrOpen(row.original)}
+              >
+                <QrCode />
+              </Button>
+              <DeleteDialog
+                trigger={
+                  <Button variant="ghost" size="icon">
+                    <Trash className="text-destructive" />
+                  </Button>
+                }
+                title="Delete Student"
+                description="This action cannot be undone. This will permanently delete the student and remove their data from our servers."
+                onDelete={() => {
+                  handleDelete(row.original.id);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

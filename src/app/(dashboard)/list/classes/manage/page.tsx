@@ -49,7 +49,7 @@ const Schema = z.object({
     (val) => Number(val),
     z.number().min(1, { message: "Capacity must be at least 1" })
   ),
-  supervisorId: z.string(),
+  teacherId: z.string().min(1),
 });
 type FormData = z.infer<typeof Schema>;
 
@@ -96,7 +96,7 @@ const ManageClass = () => {
           form.reset({
             name: classData.name || "",
             capacity: classData.capacity || 0,
-            supervisorId: classData.supervisorId || "",
+            teacherId: classData.teacherId || "",
           });
         } catch (error) {
           console.error("Error fetching teacher:", error);
@@ -119,7 +119,7 @@ const ManageClass = () => {
     defaultValues: {
       name: "",
       capacity: 0,
-      supervisorId: "",
+      teacherId: "",
     },
   });
 
@@ -210,7 +210,7 @@ const ManageClass = () => {
             <div className="flex flex-col gap-2">
               <FormField
                 control={form.control}
-                name="supervisorId"
+                name="teacherId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Supervisor</FormLabel>
@@ -221,9 +221,6 @@ const ManageClass = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {isLoading && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin flex justify-center" />
-                        )}
                         {teachers?.map((teacher: Teacher) => (
                           <SelectItem key={teacher.id} value={teacher.id}>
                             {`${teacher.name} ${teacher.surname}`}
@@ -232,7 +229,7 @@ const ManageClass = () => {
                       </SelectContent>
                     </Select>
                     <FormMessage>
-                      {form.formState.errors.supervisorId?.message}
+                      {form.formState.errors.teacherId?.message}
                     </FormMessage>
                   </FormItem>
                 )}

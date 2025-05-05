@@ -129,29 +129,22 @@ const ManageStudent = () => {
   });
 
   useEffect(() => {
-    if (path) {
-      setAction(path);
-    }
-  }, [path]);
-
-  useEffect(() => {
     const fetchStudent = async () => {
       if (action === "edit" && id) {
         try {
           const response = await axios.get(`/api/students/getstudent/${id}`);
           const studentData = response.data.data;
-          console.log(response);
 
           const birthday = studentData.birthday
             ? new Date(studentData.birthday)
             : undefined;
 
           form.reset({
+            firstname: studentData.firstname || "",
+            lastname: studentData.lastname || "",
             username: studentData.username || "",
             email: studentData.email || "",
             password: studentData.password || "",
-            firstname: studentData.firstname || "",
-            lastname: studentData.lastname || "",
             phone: studentData.phone || "",
             address: studentData.address || "",
             birthday: studentData.birthday
@@ -598,40 +591,43 @@ const ManageStudent = () => {
                 )}
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <FormField
-                control={form.control}
-                name="classId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Class</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value?.toString()}
-                    >
-                      <FormControl>
+            <FormField
+              control={form.control}
+              name="classId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Class</FormLabel>
+                  <FormControl>
+                    {isClassesLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="animate-spin w-4 h-4" />
+                        <span>Loading classes...</span>
+                      </div>
+                    ) : isClassesError ? (
+                      <div className="text-red-500">Failed to load classes.</div>
+                    ) : (
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Class" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isClassesLoading && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin flex justify-center" />
-                        )}
-                        {classes?.map((cls: Class) => (
-                          <SelectItem key={cls.id} value={cls.id.toString()}>
-                            {cls.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage>
-                      {form.formState.errors.classId?.message}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-            </div>
+                        <SelectContent>
+                          {classes.map((cls: Class) => (
+                            <SelectItem key={cls.id} value={cls.id.toString()}>
+                              {cls.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+
+                      </Select>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <Button
             type="submit"

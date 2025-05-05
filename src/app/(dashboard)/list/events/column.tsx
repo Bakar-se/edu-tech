@@ -4,7 +4,7 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox";
 import { role } from "@/lib/data";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useRouter } from "next/navigation";
@@ -13,12 +13,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { Edit, Eye, Trash } from "lucide-react";
-
+import { Badge } from "@/components/ui/badge";
 
 export type Event = {
   id: number;
   title: string;
-  class: string;
+  class: {
+    id: number;
+    name: string;
+  };
   date: string;
   startTime: string;
   endTime: string;
@@ -84,6 +87,13 @@ export const useEventColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Class" />
       ),
+      cell: ({ row }: { row: Row<Event> }) => {
+        const classInfo = row.original.class; // This is a single object, not an array.
+
+        return (
+          <Badge>{classInfo.name}</Badge> // Display the name of the class
+        );
+      },
     },
     {
       accessorKey: "date",

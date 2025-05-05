@@ -8,10 +8,13 @@ import { subjectsData } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 
 const SubjectList = () => {
   const router = useRouter();
   const columns = useSubjectColumns();
+  const { user } = useUser();
+  const role = user?.publicMetadata.role as string | undefined;
 
   const fetchSubjects = async () => {
     const response = await axios.get("/api/subjects/getallsubjects");
@@ -31,12 +34,14 @@ const SubjectList = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold mb-4">Subjects</h1>
-        <Button
-          className="mb-4 flex items-center"
-          onClick={() => router.push("/list/subjects/manage?action=create")}
-        >
-          <PlusCircle /> Register Subject
-        </Button>
+        {role === "admin" && (
+          <Button
+            className="mb-4 flex items-center"
+            onClick={() => router.push("/list/subjects/manage?action=create")}
+          >
+            <PlusCircle /> Register Subject
+          </Button>
+        )}
       </div>
       {isLoading ? (
         <Loader2 className="h-10 w-10 animate-spin" />
