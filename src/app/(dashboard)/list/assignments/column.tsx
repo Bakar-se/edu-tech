@@ -1,16 +1,19 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/DataTableColumnHeaderProps";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
-import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import moment from "moment";
+import { useRouter } from "next/navigation";
 
 export type Assignment = {
   id: number;
@@ -94,36 +97,36 @@ export const useAssignmentColumns = () => {
         <DataTableColumnHeader column={column} title="Due Date" />
       ),
     },
-    ...(role === "teacher"
+    ...(role === "admin" || "teacher"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Assignment> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link
-                  href={`/list/assignments/manage?action=edit&id=${row.original.id}`}
-                >
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Assignment> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link
+                href={`/list/assignments/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <DeleteDialog
+                trigger={
                   <Button variant="ghost" size="icon">
-                    <Edit />
+                    <Trash className="text-destructive" />
                   </Button>
-                </Link>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Class"
-                  description="This action cannot be undone. This will permanently delete the assignment and remove its data from our servers."
-                  onDelete={() => {
-                    handleDelete(row.original.id);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+                }
+                title="Delete Class"
+                description="This action cannot be undone. This will permanently delete the assignment and remove its data from our servers."
+                onDelete={() => {
+                  handleDelete(row.original.id);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

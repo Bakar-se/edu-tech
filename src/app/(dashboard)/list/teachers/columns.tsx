@@ -12,8 +12,11 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 export type Teacher = {
+  class: any;
+  subject: any;
   id: string;
   teacherId: string;
   name: string;
@@ -95,16 +98,30 @@ export const useTeacherColumns = () => {
       ),
     },
     {
-      accessorKey: "subjects",
+      accessorKey: "subject",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Subjects" />
+        <DataTableColumnHeader column={column} title="Subject" />
       ),
+      cell: ({ row }: { row: Row<Teacher> }) => {
+        const subject = row.original.subject; // This is a single object, not an array.
+
+        return (
+          <Badge>{subject.name}</Badge> // Display the name of the subject
+        );
+      },
     },
     {
-      accessorKey: "classes",
+      accessorKey: "class",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Classes" />
+        <DataTableColumnHeader column={column} title="Class" />
       ),
+      cell: ({ row }: { row: Row<Teacher> }) => {
+        const classInfo = row.original.class; // This is a single object, not an array.
+
+        return (
+          <Badge>{classInfo.name}</Badge> // Display the name of the class
+        );
+      },
     },
     {
       accessorKey: "phone",

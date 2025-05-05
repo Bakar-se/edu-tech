@@ -5,7 +5,7 @@ type Props = React.PropsWithChildren<{}>;
 
 const MessagesLayout = ({ children }: Props) => {
   return (
-    <SidebarWrapper>{ children }</SidebarWrapper>
+    <SidebarWrapper>{children}</SidebarWrapper>
   )
 }
 

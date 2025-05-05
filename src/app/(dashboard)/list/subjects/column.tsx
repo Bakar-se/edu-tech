@@ -101,34 +101,34 @@ export const useSubjectColumns = () => {
     },
     ...(role === "admin"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Subject> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link
-                  href={`/list/subjects/manage?action=edit&id=${row.original.id}`}
-                >
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Subject> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link
+                href={`/list/subjects/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <DeleteDialog
+                trigger={
                   <Button variant="ghost" size="icon">
-                    <Edit />
+                    <Trash className="text-destructive" />
                   </Button>
-                </Link>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Subject"
-                  description="This action cannot be undone. This will permanently delete the subject and remove their data from our servers."
-                  onDelete={() => {
-                    console.log("Deleting subject:", row.original);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+                }
+                title="Delete Subject"
+                description="This action cannot be undone. This will permanently delete the subject and remove their data from our servers."
+                onDelete={() => {
+                  console.log("Deleting subject:", row.original);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

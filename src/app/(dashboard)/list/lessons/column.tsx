@@ -159,39 +159,39 @@ export const useLessonColumns = () => {
     },
     ...(role === "admin"
       ? [
-          {
-            id: "action",
-            header: () => <div className="text-center">Action</div>,
-            cell: ({ row }: { row: Row<Lesson> }) => (
-              <div className="flex items-center justify-center space-x-2">
-                <Link
-                  href={`/list/lessons/manage?action=edit&id=${row.original.id}`}
-                >
+        {
+          id: "action",
+          header: () => <div className="text-center">Action</div>,
+          cell: ({ row }: { row: Row<Lesson> }) => (
+            <div className="flex items-center justify-center space-x-2">
+              <Link
+                href={`/list/lessons/manage?action=edit&id=${row.original.id}`}
+              >
+                <Button variant="ghost" size="icon">
+                  <Edit />
+                </Button>
+              </Link>
+              <Link href={`/list/lessons/view?id=${row.original.id}`}>
+                <Button variant="ghost" size="icon">
+                  <Eye />
+                </Button>
+              </Link>
+              <DeleteDialog
+                trigger={
                   <Button variant="ghost" size="icon">
-                    <Edit />
+                    <Trash className="text-destructive" />
                   </Button>
-                </Link>
-                <Link href={`/list/lessons/view?id=${row.original.id}`}>
-                  <Button variant="ghost" size="icon">
-                    <Eye />
-                  </Button>
-                </Link>
-                <DeleteDialog
-                  trigger={
-                    <Button variant="ghost" size="icon">
-                      <Trash className="text-destructive" />
-                    </Button>
-                  }
-                  title="Delete Lesson"
-                  description="This action cannot be undone. This will permanently delete the lesson and remove its data from our servers."
-                  onDelete={() => {
-                    handleDelete(row.original.id);
-                  }}
-                />
-              </div>
-            ),
-          },
-        ]
+                }
+                title="Delete Lesson"
+                description="This action cannot be undone. This will permanently delete the lesson and remove its data from our servers."
+                onDelete={() => {
+                  handleDelete(row.original.id);
+                }}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

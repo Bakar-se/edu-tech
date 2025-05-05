@@ -1,23 +1,22 @@
-// /api/classes/delete/[id]/route.ts
-import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function DELETE(
-    req: NextRequest,
+    req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id } = await params;
 
-        const deletedExam = await prisma.exam.delete({
-            where: { id: Number(id) },
+        const deletedSubject = await prisma.subject.delete({
+            where: { id },
         });
 
-        return NextResponse.json({ data: deletedExam }, { status: 200 });
+        return NextResponse.json(deletedSubject, { status: 200 });
     } catch (error) {
-        console.error("Error deleting exam:", error);
+        console.error(error);
         return NextResponse.json(
-            { message: "Internal Server Error" },
+            { message: "Failed to delete subject", error },
             { status: 500 }
         );
     }
